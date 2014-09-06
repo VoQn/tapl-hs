@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase, OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Chapter4.SyntaxSpec where
 
@@ -11,20 +11,20 @@ import Chapter4.Display
 import Chapter4.Syntax
 
 instance Arbitrary Term where
-  arbitrary = genTerm
+  arbitrary = oneof [gNum, gBool, gIf]
     where
-    genZero = elements [TmZero]
-    genBool = elements [TmTrue, TmFalse]
+    gZero  = elements [TmZero]
+    gBool1 = elements [TmTrue, TmFalse]
 
-    genNumF = elements [TmSucc, TmPred]
-    genNum1 = ($) <$> genNumF <*> genZero
-    genNum  = oneof [genNum1, genZero]
+    gNumV = foldr ($) TmZero <$> listOf (elements [TmSucc, TmPred])
 
-    genIsZero = TmIsZero <$> genNum
-    genIf   = TmIf <$> genBool <*> genTerm <*> genTerm
+    gIsZero = TmIsZero <$> gNumV
+    gIfBool = TmIf <$> gBool <*> gBool <*> gBool
+    gIfNum  = TmIf <$> gBool <*> gNum  <*> gNum
 
-    genVal  = oneof [genNum, genBool]
-    genTerm = oneof [genVal, genIsZero, genIf]
+    gIf   = oneof [gIfNum, gIfBool]
+    gNum  = oneof [gZero,  gNumV]
+    gBool = oneof [gBool1, gIsZero]
 
 instance Arbitrary Ty where
   arbitrary = elements [TyBool,TyNat]
@@ -112,9 +112,27 @@ spec = do
       "(if true true false)"
 
   describe "Term can compare each as equal" $ do
-
     prop "x == x" propTermEq
     prop "x /= y ==> x /= y" propTermNotEq
+
+  describe "Term can show own" $ do
+
+    it "TmZero"  $ show TmZero  `shouldBe` "TmZero"
+    it "TmTrue"  $ show TmTrue  `shouldBe` "TmTrue"
+    it "TmFalse" $ show TmFalse `shouldBe` "TmFalse"
+
+    it "TmIsZero TmZero" $
+      show (TmIsZero TmZero) `shouldBe` "TmIsZero TmZero"
+
+    it "TmSucc TmZero" $
+      show (TmSucc TmZero) `shouldBe` "TmSucc TmZero"
+
+    it "TmPred TmZero" $
+      show (TmPred TmZero) `shouldBe` "TmPred TmZero"
+
+    it "TmIf TmTrue TmZero (TmSucc TmZero)" $
+      show (TmIf TmTrue TmZero (TmSucc TmZero)) `shouldBe`
+      "TmIf TmTrue TmZero (TmSucc TmZero)"
 
   describe "Type can compare each as equal" $ do
 
@@ -123,11 +141,13 @@ spec = do
 
   describe "Type can display own expression" $ do
 
-    it "Bool" $
-      toDisplay TyBool `shouldBe` "Bool"
+    it "Bool" $ toDisplay TyBool `shouldBe` "Bool"
+    it "Nat"  $ toDisplay TyNat  `shouldBe` "Nat"
 
-    it "Nat" $
-      toDisplay TyNat `shouldBe` "Nat"
+  describe "Type can show own" $ do
+
+    it "Bool" $ show TyBool `shouldBe` "TyBool"
+    it "Nat"  $ show TyNat  `shouldBe` "TyNat"
 
 propTyEq :: Ty -> Bool
 propTyEq x = x == x

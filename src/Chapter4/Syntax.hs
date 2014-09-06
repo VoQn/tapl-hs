@@ -48,9 +48,3 @@ isBool = \case
   TmIsZero t -> isNumeric t
   TmIf p t f -> all isBool [p,t,f]
   _ -> False
-
-isVal :: Term -> Bool
-isVal t = case t of
-  TmTrue  -> True
-  TmFalse -> True
-  _ -> isNumeric t
