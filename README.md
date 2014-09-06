@@ -1,8 +1,8 @@
-# tapl-hs [![MIT License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
+# tapl-hs [![Build Status](http://img.shields.io/travis/VoQn/tapl-hs.svg?style=flat-square)](https://travis-ci.org/VoQn/tapl-hs) [![Coverage Status](https://img.shields.io/coveralls/VoQn/tapl-hs.svg?style=flat-square)](https://coveralls.io/r/VoQn/tapl-hs?branch=master) [![MIT License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
 
 ## TaPL Language Implement by Haskell
 
-This is an exercise repository of Implement Programming language according to the book _TaPL (Types and Programming Language)_
+This is an exercise repository of Implement Programming language according to the book [_TaPL (Types and Programming Language)_](http://www.cis.upenn.edu/~bcpierce/tapl/)
 
 ## How to Build
 
