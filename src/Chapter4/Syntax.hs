@@ -11,12 +11,12 @@ data Term
   | TmSucc Term
   | TmPred Term
   | TmIsZero Term
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Show)
 
 data Ty
   = TyBool
   | TyNat
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Show)
 
 instance Display Term where
   toDisplay = \case

@@ -10,7 +10,7 @@ import Chapter4.Display
 type FuncForm = String
 
 data Terminate = NoRuleApplies | TypeError Ty FuncForm Term
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Show)
 
 instance Display Terminate where
   toDisplay = \case
