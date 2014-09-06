@@ -29,7 +29,7 @@ sep :: (Monoid m) => m -> [m] -> m
 sep = sep' mempty
 
 sep' :: (Monoid m) => m -> m -> [m] -> m
-sep' m _ [] = m
+sep' m _ []     = m
 sep' m _ (x:[]) = m <> x
 sep' m s (x:xs) = sep' (m <> x <> s) s xs
 
