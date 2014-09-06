@@ -1,9 +1,7 @@
 {-# LANGUAGE LambdaCase, OverloadedStrings #-}
-module Syntax where
+module Chapter4.Syntax where
 
-import Data.List (intercalate)
-import qualified Data.Text.Lazy.Builder as LB
-import Display
+import Chapter4.Display
 
 data Term
   = TmTrue

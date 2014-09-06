@@ -1,10 +1,10 @@
-module Parser (parseExpr) where
+module Chapter4.Parser (parseExpr) where
 
 import Control.Applicative hiding ((<|>), many)
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
-import Syntax
+import Chapter4.Syntax
 
 whitespace :: Parser a -> Parser a
 whitespace p = many space *> p

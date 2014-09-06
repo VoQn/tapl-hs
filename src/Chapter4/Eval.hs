@@ -1,11 +1,11 @@
 {-# LANGUAGE LambdaCase, OverloadedStrings #-}
-module Eval where
+module Chapter4.Eval where
 
 import Control.Applicative
 import Data.Monoid
 
-import Syntax
-import Display
+import Chapter4.Syntax
+import Chapter4.Display
 
 type FuncForm = String
 
