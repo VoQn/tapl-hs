@@ -1,0 +1,7 @@
+
+# Distribution directory
+dist/
+
+# Sandbox
+.cabal-sandbox/
+cabal.sandbox.config
