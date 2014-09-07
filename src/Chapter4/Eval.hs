@@ -5,7 +5,7 @@ import Control.Applicative
 import Data.Monoid
 
 import Chapter4.Syntax
-import Chapter4.Display
+import Data.Display
 
 type FuncForm = String
 

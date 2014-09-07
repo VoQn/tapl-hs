@@ -7,7 +7,7 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 
-import Chapter4.Display
+import Data.Display
 import Chapter4.Syntax
 
 instance Arbitrary Term where

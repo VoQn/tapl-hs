@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase, OverloadedStrings #-}
 module Chapter4.Syntax where
 
-import Chapter4.Display
+import Data.Display
 
 data Term
   = TmTrue
