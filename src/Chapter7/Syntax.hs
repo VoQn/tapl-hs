@@ -22,18 +22,25 @@ data Binding
 type Context = [(Name, Binding)]
 
 data RuntimeError
-  = OutOfContextIndex Int
+  = WrongContextLength Int Int Int
+  | OutOfContextIndex Int
   | UnboundIdentifier Name
   deriving (Eq, Show)
 
 instance Display RuntimeError where
   toDisplay = \case
 
+    WrongContextLength vi vl cl ->
+      let [i,l,s] = map toDisplay [vi,vl,cl] in
+      "[BAD_INDEX] Value has wrong index " <>
+      "(index: " <> i <> ", length: " <> l <> ")\n" <>
+      "[INFO] Context has (length: " <> s <> ")"
+
     OutOfContextIndex i ->
-      "Not found indexed-" <> toDisplay i <> " variable in this context"
+      "[NOT_FOUND] Not found variable (index: " <> toDisplay i <> ") in this context"
 
     UnboundIdentifier n ->
-      "Identifier " <> toDisplay n <> " is unbound"
+      "[UNBOUND_ID] Identifier " <> toDisplay n <> " is unbound"
 
 withContext :: Context -> Term -> LB.Builder
 withContext c = \case
@@ -45,9 +52,9 @@ withContext c = \case
   TmApp f x ->
     parens $ spaceSep $ map (disp c) [f, x]
 
-  TmVar i l
-    | length c == l -> eitherDisplay $ indexToName c i
-    | otherwise     -> "[BAD INDEX]"
+  TmVar i l ->
+    eitherDisplay $ indexToName c i l
+
   where
   disp :: Context -> Term -> LB.Builder
   disp x y = toDisplay $ withContext x y
@@ -67,8 +74,9 @@ isNameBound c n = case c of
     | fst y == n -> True
     | otherwise  -> isNameBound ys n
 
-indexToName :: Context -> Int -> Either RuntimeError Name
-indexToName c i
+indexToName :: Context -> Int -> Int -> Either RuntimeError Name
+indexToName c i l
+  | length c /= l = Left $ WrongContextLength i l $ length c
   | length c <= i = Left $ OutOfContextIndex i
   | otherwise     = Right $ fst $ c !! i
 
