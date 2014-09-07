@@ -1,25 +1,36 @@
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase,OverloadedStrings #-}
 module Chapter7.Syntax where
 
+import Data.Display
+import qualified Data.Text.Lazy.Builder as LB
+
 data Term
-  = TmVar Int Int
+  = TmVar Int Int     -- TmVar { index :: Int, contextLength :: Int }
   | TmAbs String Term
   | TmApp Term Term
   deriving (Eq, Show)
 
-data Binding = NameBind
+data Binding
+  = NameBind
+  deriving (Eq, Show)
 
 type Context = [(String, Binding)]
 
-toDisplay :: Context -> Term -> String
-toDisplay ctx = \case
+withContext :: Context -> Term -> LB.Builder
+withContext ctx = \case
+
   TmAbs x t ->
-    let (ctx', x') = pickFreshName ctx x in
-    "(\\" ++ x' ++ ". "　++ (toDisplay ctx' t) ++ ")"
+    let (ctx', x') = pickFreshName ctx x
+        x''        = toDisplay x'
+        desc       = toDisplay $ withContext ctx' t
+    in　parens $ spaceSep $ ["\\", x'', desc]
+
   TmApp t1 t2 ->
-    "(" ++ (toDisplay ctx t1) ++ " " ++ (toDisplay ctx t2) ++ ")"
+    let disp = toDisplay . withContext ctx in
+    parens $ spaceSep $ map disp [t1, t2]
+
   TmVar x n
-    | length ctx == n -> indexToName ctx x
+    | length ctx == n -> toDisplay $ indexToName ctx x
     | otherwise -> "[BAD INDEX]"
 
 pickFreshName :: Context -> String -> (Context, String)
