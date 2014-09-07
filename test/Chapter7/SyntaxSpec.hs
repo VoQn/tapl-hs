@@ -2,7 +2,7 @@
 module Chapter7.SyntaxSpec where
 
 import Test.Hspec
-
+import Data.Monoid
 import Data.Display
 import Chapter7.Syntax
 
@@ -15,11 +15,29 @@ spec = do
 
       it "(\\ x x) , x -> 0" $ do
         let ctx = [("x", NameBind)]
-        (nameToIndex ctx "x") `shouldBe` 0
+        nameToIndex ctx "x" `shouldBe` Right 0
 
       it "(\\ x (\\ y x)) , x -> 1" $ do
         let ctx = [("y",NameBind), ("x", NameBind)]
-        (nameToIndex ctx "x") `shouldBe` 1
+        nameToIndex ctx "x" `shouldBe` Right 1
+
+      it "(\\ x (\\ y x)) , z -> <Error>" $ do
+        let ctx = [("y",NameBind), ("x", NameBind)]
+        nameToIndex ctx "z" `shouldBe` Left (UnboundIdentifier "z")
+
+    describe "find variable name from index" $ do
+
+      it "can find exist variable from context" $ do
+        let ctx = [("x",NameBind)]
+        indexToName ctx 0 1 `shouldBe` Right "x"
+
+      it "cannot find variable by out-of-context index" $ do
+        let ctx = [("x",NameBind)]
+        indexToName ctx 0 2 `shouldBe` Left (WrongContextLength 0 2 1)
+
+      it "cannot find from empty context" $ do
+        let ctx = []
+        indexToName ctx 0 0 `shouldBe` Left (OutOfContextIndex 0)
 
     describe "display own expression according to context" $ do
 
@@ -55,8 +73,17 @@ spec = do
         toDisplay (withContext ctx expr) `shouldBe`
           "((\\ x x) (\\ y y))"
 
-      it "wrong index case : (\\.1)" $ do
-        let expr = TmVar 1 1
-        let ctx  = []
-        toDisplay (withContext ctx expr) `shouldBe`
-          "[BAD INDEX]"
+  describe "Error Handling" $ do
+
+      it "variable has wrong context-length" $
+        toDisplay (OutOfContextIndex 1) `shouldBe`
+        "[NOT_FOUND] Not found variable (index: 1) in this context"
+
+      it "unbound identifier" $
+        toDisplay (UnboundIdentifier "z") `shouldBe`
+        "[UNBOUND_ID] Identifier z is unbound"
+
+      it "wrong index case : (\\.1)" $
+        toDisplay (WrongContextLength 1 1 0) `shouldBe`
+        "[BAD_INDEX] Value has wrong index (index: 1, length: 1)\n" <>
+        "[INFO] Context has (length: 0)"
