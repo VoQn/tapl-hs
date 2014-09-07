@@ -24,14 +24,14 @@ spec = do
       it "(\\ x (\\ y x)) , z -> <Error>" $ do
         let ctx = [("y",NameBind), ("x", NameBind)]
         (nameToIndex ctx "z") `shouldBe`
-          Left "Identifier z is unbound"
+          Left (UnboundIdentifier "z")
 
     describe "find variable name from index" $ do
 
-      it "" $ do
+      it "cannot find from empty context" $ do
         let ctx = []
         (indexToName ctx 0) `shouldBe`
-          Left "Not found indexed-0 variable in this context"
+          Left (OutOfContextIndex 0)
 
     describe "display own expression according to context" $ do
 
