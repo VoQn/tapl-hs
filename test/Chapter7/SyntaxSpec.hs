@@ -15,11 +15,23 @@ spec = do
 
       it "(\\ x x) , x -> 0" $ do
         let ctx = [("x", NameBind)]
-        (nameToIndex ctx "x") `shouldBe` 0
+        (nameToIndex ctx "x") `shouldBe` Right 0
 
       it "(\\ x (\\ y x)) , x -> 1" $ do
         let ctx = [("y",NameBind), ("x", NameBind)]
-        (nameToIndex ctx "x") `shouldBe` 1
+        (nameToIndex ctx "x") `shouldBe` Right 1
+
+      it "(\\ x (\\ y x)) , z -> <Error>" $ do
+        let ctx = [("y",NameBind), ("x", NameBind)]
+        (nameToIndex ctx "z") `shouldBe`
+          Left "Identifier z is unbound"
+
+    describe "find variable name from index" $ do
+
+      it "" $ do
+        let ctx = []
+        (indexToName ctx 0) `shouldBe`
+          Left "Not found indexed-0 variable in this context"
 
     describe "display own expression according to context" $ do
 

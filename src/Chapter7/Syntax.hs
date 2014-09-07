@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase,OverloadedStrings #-}
 module Chapter7.Syntax where
 
+import Control.Applicative
 import Data.Display
 import qualified Data.Text.Lazy.Builder as LB
 
@@ -15,6 +16,7 @@ data Binding
   deriving (Eq, Show)
 
 type Context = [(String, Binding)]
+type ErrorMsg = String
 
 withContext :: Context -> Term -> LB.Builder
 withContext ctx = \case
@@ -30,8 +32,10 @@ withContext ctx = \case
     parens $ spaceSep $ map disp [t1, t2]
 
   TmVar x n
-    | length ctx == n -> toDisplay $ indexToName ctx x
-    | otherwise -> "[BAD INDEX]"
+    | length ctx == n ->
+        either toDisplay toDisplay $ indexToName ctx x
+    | otherwise ->
+        "[BAD INDEX]"
 
 pickFreshName :: Context -> String -> (Context, String)
 pickFreshName ctx x
@@ -45,12 +49,16 @@ isNameBound ctx x = case ctx of
     | y == x -> True
     | otherwise -> isNameBound rest x
 
-indexToName :: Context -> Int -> String
-indexToName ctx x = let (xn, _) = ctx !! x in xn
+indexToName :: Context -> Int -> Either ErrorMsg String
+indexToName ctx x
+  | length ctx <= x =
+      Left $ "Not found indexed-" ++ show x ++ " variable in this context"
+  | otherwise =
+      Right $ fst $ ctx !! x
 
-nameToIndex :: Context -> String -> Int
+nameToIndex :: Context -> String -> Either ErrorMsg Int
 nameToIndex ctx x = case ctx of
-  [] -> error ("Identifier " ++ x ++ " is unbound")
+  [] -> Left $ "Identifier " ++ x ++ " is unbound"
   ((y,_):rest)
-    | y == x -> 0
-    | otherwise -> 1 + (nameToIndex rest x)
+    | y == x -> Right 0
+    | otherwise -> (1 +) <$> nameToIndex rest x
