@@ -3,7 +3,7 @@ module Chapter4.EvalSpec where
 
 import Test.Hspec
 
-import Chapter4.Display
+import Data.Display
 import Chapter4.Syntax
 import Chapter4.Eval
 

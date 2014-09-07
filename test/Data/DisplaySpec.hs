@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Chapter4.DisplaySpec where
+module Data.DisplaySpec where
 
 import Test.Hspec
 
-import Chapter4.Display
+import Data.Display
 
 spec :: Spec
 spec = do

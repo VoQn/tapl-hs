@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, OverloadedStrings #-}
-module Chapter4.Display (Display(..), parens, spaceSep) where
+module Data.Display (Display(..), parens, spaceSep) where
 
 import qualified Data.Text.Lazy.Builder as LB
 import qualified Data.Text.Lazy.IO as LIO
