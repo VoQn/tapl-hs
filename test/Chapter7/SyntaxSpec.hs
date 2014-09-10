@@ -81,7 +81,7 @@ spec = do
 
       it "unbound identifier" $
         toDisplay (UnboundIdentifier "z") `shouldBe`
-        "[UNBOUND_ID] Identifier z is unbound"
+        "[UNBOUND_ID] Identifier \"z\" is unbound"
 
       it "wrong index case : (\\.1)" $
         toDisplay (WrongContextLength 1 1 0) `shouldBe`

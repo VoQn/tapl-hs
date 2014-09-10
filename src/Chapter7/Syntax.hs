@@ -41,10 +41,11 @@ instance Display RuntimeError where
       "[INFO] Context has (length: " <> s <> ")"
 
     OutOfContextIndex i ->
-      "[NOT_FOUND] Not found variable (index: " <> toDisplay i <> ") in this context"
+      "[NOT_FOUND] Not found variable " <>
+      "(index: " <> toDisplay i <> ") in this context"
 
     UnboundIdentifier n ->
-      "[UNBOUND_ID] Identifier " <> toDisplay n <> " is unbound"
+      "[UNBOUND_ID] Identifier \"" <> toDisplay n <> "\" is unbound"
 
 withContext :: Context -> Term -> LB.Builder
 withContext c = \case
