@@ -123,3 +123,12 @@ spec = do
 
       it "subst 1 \\.2(4) \\.1(5)" $
         subst 1 (TmVar 2 4) (TmVar 1 5) `shouldBe` TmVar 2 4
+
+    describe "substitute on Top Level" $ do
+
+      it "substTop ((\\ x (\\ y x)) (\\ x x)) <-> (\\ z z)" $ do
+        let t = TmAbs "z" $ TmVar 0 1
+        let f = TmAbs "x" $ TmAbs "y" $ TmVar 1 2
+        let g = TmAbs "x" $ TmVar 0 1
+
+        substTop (TmApp f g) t `shouldBe` TmAbs "z" (TmVar 0 0)

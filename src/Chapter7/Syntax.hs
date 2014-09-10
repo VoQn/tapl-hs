@@ -116,3 +116,7 @@ subst j s = walk 0
     TmVar i l
       | i == j + c -> shift c s
       | otherwise  -> TmVar i l
+
+substTop :: Term -> Term -> Term
+substTop s =
+  shift (-1) . subst 0 (shift 1 s)
