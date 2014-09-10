@@ -28,6 +28,64 @@ data RuntimeError
   deriving (Eq, Show)
 
 -------------------------------------------------------------------------------
+-- Examples
+-------------------------------------------------------------------------------
+(<+) :: Int -> Int -> Term
+i <+ l = TmVar i l
+infix 4 <+
+
+(+>) :: Name -> Term -> Term
+n +> t = TmAbs n t
+infixr 2 +>
+
+(<+>) :: Term -> Term -> Term
+t1 <+> t2 = TmApp t1 t2
+infixl 3 <+>
+
+-- Church id ... λx.x (λ.0)
+cId :: Term
+cId = "x" +> 0 <+ 1
+
+cIdn :: Name -> Term
+cIdn n = n +> 0 <+ 1
+
+-- Church true ... λt.λf.t (λ.λ.1)
+cTru :: Term
+cTru = "t" +> "f" +> 1 <+ 2
+
+-- Church false ... λt.λf.f (λ.λ.0)
+cFls :: Term
+cFls = "t" +> "f" +> 0 <+ 2
+
+-- Church if ... λl.λm.λn.l m n (λ.λ.λ.2 0 1)
+cTest :: Term
+cTest = "l" +> "m" +> "n" +> (2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3)
+
+-- Church and ... λb.λc.b c fls (λ.λ.1 0 fls)
+cAnd :: Term
+cAnd = "b" +> "c" +> (1 <+ 2) <+> (0 <+ 2) <+> shift 2 cFls
+
+-- Church or  ... λb.λc.b c tru (λ.λ.1 0 tru)
+cOr :: Term
+cOr = "b" +> "c" +> (1 <+ 2) <+> shift 2 cTru <+> (0 <+ 2)
+
+-- Church pair ... λf.λs.λb.b f s (λ.λ.λ.0 2 1)
+cPair :: Term
+cPair = "f" +> "s" +> "b" +> (0 <+ 3) <+> (2 <+ 3) <+> (1 <+ 3)
+
+-- Church fst  ... λp.p tru (λ.0 tru)
+cFst :: Term
+cFst = "p" +> (0 <+ 1) <+> shift 1 cTru
+
+-- Church snd  ... λp.p fls (λ.0 fls)
+cSnd :: Term
+cSnd = "p" +> (0 <+ 1) <+> shift 1 cFls
+
+-- Church isZero ... λm.m (λx. fls) tru
+cIsZro :: Term
+cIsZro = "m" +> (0 <+ 1) <+> ("x" +> shift 1 cFls) <+> shift 1 cTru
+
+-------------------------------------------------------------------------------
 -- Display Term & Error
 -------------------------------------------------------------------------------
 
@@ -101,22 +159,22 @@ shift d = walk 0
   where
   walk :: Int -> Term -> Term
   walk c = \case
-    TmAbs x t   -> TmAbs x $ walk (c + 1) t
-    TmApp t1 t2 -> TmApp (walk c t1) (walk c t2)
+    TmAbs x t   -> x +> walk (c + 1) t
+    TmApp t1 t2 -> walk c t1 <+> walk c t2
     TmVar i l
-      | i >= l    -> TmVar (i + d) (l + d)
-      | otherwise -> TmVar i (l + d)
+      | i >= l    -> i + d <+ l + d
+      | otherwise -> i <+ l + d
 
 subst :: Int -> Term -> Term -> Term
 subst j s = walk 0
   where
   walk :: Int -> Term -> Term
   walk c = \case
-    TmAbs x t   -> TmAbs x $ walk (c + 1) t
-    TmApp t1 t2 -> TmApp (walk c t1) (walk c t2)
+    TmAbs x t   -> x +> walk (c + 1) t
+    TmApp t1 t2 -> walk c t1 <+> walk c t2
     TmVar i l
       | i == j + c -> shift c s
-      | otherwise  -> TmVar i l
+      | otherwise  -> i <+ l
 
 substTop :: Term -> Term -> Term
 substTop s =
