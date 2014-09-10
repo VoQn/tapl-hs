@@ -73,7 +73,7 @@ spec = do
         toDisplay (withContext ctx expr) `shouldBe`
           "((\\ x x) (\\ y y))"
 
-  describe "Error Handling" $ do
+    describe "Error Handling" $ do
 
       it "variable has wrong context-length" $
         toDisplay (OutOfContextIndex 1) `shouldBe`
@@ -87,3 +87,48 @@ spec = do
         toDisplay (WrongContextLength 1 1 0) `shouldBe`
         "[BAD_INDEX] Value has wrong index (index: 1, length: 1)\n" <>
         "[INFO] Context has (length: 0)"
+
+    describe "shift variable index" $ do
+
+      it "shift (\\ x x)" $
+        shift 1 (TmAbs "x" $ TmVar 0 1) `shouldBe`
+        TmAbs "x" (TmVar 0 2)
+
+      it "shift (\\ x x)" $
+        shift 1 (TmAbs "x" $ TmAbs "y" $ TmVar 1 2) `shouldBe`
+        TmAbs "x" (TmAbs "y" $ TmVar 1 3)
+
+      it "shift ((\\ y (\\ x y)) (\\ x x))" $ do
+        let f = TmAbs "y" $ TmAbs "x" $ TmVar 1 2
+        let g = TmAbs "x" $ TmVar 0 1
+        shift 1 (TmApp f g) `shouldBe`
+          TmApp (TmAbs "y" $ TmAbs "x" $ TmVar 1 3) (TmAbs "x" $ TmVar 0 2)
+
+      it "shift (x)" $
+        shift 10 (TmVar 0 1) `shouldBe` TmVar 0 11
+
+      it "shuft \\.1" $
+        shift 1 (TmVar 1 1) `shouldBe` TmVar 2 2
+
+    describe "substitute varibales" $ do
+
+      it "subst (((\\ x x) (\\ x x)) (\\ y y))" $ do
+        let f = TmAbs "x" $ TmVar 0 1
+        let g = TmAbs "x" $ TmVar 0 1
+        let h = TmAbs "y" $ TmVar 0 1
+        subst 1 h (TmApp f g) `shouldBe` TmApp f g
+
+      it "subst 0 \\.0 \\.0" $
+        subst 0 (TmVar 0 1) (TmVar 0 1) `shouldBe` TmVar 0 1
+
+      it "subst 1 \\.2(4) \\.1(5)" $
+        subst 1 (TmVar 2 4) (TmVar 1 5) `shouldBe` TmVar 2 4
+
+    describe "substitute on Top Level" $ do
+
+      it "substTop ((\\ x (\\ y x)) (\\ x x)) <-> (\\ z z)" $ do
+        let t = TmAbs "z" $ TmVar 0 1
+        let f = TmAbs "x" $ TmAbs "y" $ TmVar 1 2
+        let g = TmAbs "x" $ TmVar 0 1
+
+        substTop (TmApp f g) t `shouldBe` TmAbs "z" (TmVar 0 0)

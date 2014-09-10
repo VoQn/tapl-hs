@@ -29,7 +29,8 @@ library
                     Chapter4.Parser,
                     Chapter4.Syntax,
                     Chapter4.Eval,
-                    Chapter7.Syntax
+                    Chapter7.Syntax,
+                    Chapter7.Eval
 
 executable chapter4
   main-is:          Main.hs
