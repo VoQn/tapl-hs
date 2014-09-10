@@ -27,6 +27,10 @@ data RuntimeError
   | UnboundIdentifier Name
   deriving (Eq, Show)
 
+-------------------------------------------------------------------------------
+-- Display Term & Error
+-------------------------------------------------------------------------------
+
 instance Display RuntimeError where
   toDisplay = \case
 
@@ -45,12 +49,12 @@ instance Display RuntimeError where
 withContext :: Context -> Term -> LB.Builder
 withContext c = \case
 
-  TmAbs n b ->
+  TmAbs n t ->
     let (c', n') = pickFreshName c n in
-    parens $ spaceSep $ ["\\", toDisplay n', disp c' b]
+    parens $ spaceSep $ ["\\", toDisplay n', disp c' t]
 
-  TmApp f x ->
-    parens $ spaceSep $ map (disp c) [f, x]
+  TmApp t1 t2 ->
+    parens $ spaceSep $ map (disp c) [t1, t2]
 
   TmVar i l ->
     eitherDisplay $ indexToName c i l
@@ -61,6 +65,10 @@ withContext c = \case
 
   eitherDisplay :: (Display a, Display b) => Either a b -> LB.Builder
   eitherDisplay = either toDisplay toDisplay
+
+-------------------------------------------------------------------------------
+-- Term Control
+-------------------------------------------------------------------------------
 
 pickFreshName :: Context -> Name -> (Context, Name)
 pickFreshName c n
@@ -86,3 +94,25 @@ nameToIndex c n = case c of
   (y:ys)
     | fst y == n -> Right 0
     | otherwise  -> (1 +) <$> nameToIndex ys n
+
+shift :: Int -> Term -> Term
+shift d = walk 0
+  where
+  walk :: Int -> Term -> Term
+  walk c = \case
+    TmAbs x t   -> TmAbs x $ walk (c + 1) t
+    TmApp t1 t2 -> TmApp (walk c t1) (walk c t2)
+    TmVar i l
+      | i >= l    -> TmVar (i + d) (l + d)
+      | otherwise -> TmVar i (l + d)
+
+subst :: Int -> Term -> Term -> Term
+subst j s = walk 0
+  where
+  walk :: Int -> Term -> Term
+  walk c = \case
+    TmAbs x t   -> TmAbs x $ walk (c + 1) t
+    TmApp t1 t2 -> TmApp (walk c t1) (walk c t2)
+    TmVar i l
+      | i == j + c -> shift c s
+      | otherwise  -> TmVar i l
