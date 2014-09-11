@@ -31,16 +31,28 @@ pTerm
   =    pId
   <||> pTru
   <||> pFls
+  <||> pTest
+  <||> pAnd
+  <||> pOr
   <||> pApp
 
+pId :: Parser Term
+pId = cId <$ string "id"
+
 pTru :: Parser Term
-pTru = tmTru <$ string "tru"
+pTru = cTru <$ string "tru"
 
 pFls :: Parser Term
-pFls = tmFls <$ string "fls"
+pFls = cFls <$ string "fls"
 
-pId :: Parser Term
-pId = tmId <$ string "id"
+pTest :: Parser Term
+pTest = cTest <$ string "test"
+
+pAnd :: Parser Term
+pAnd = cAnd <$ string "and"
+
+pOr :: Parser Term
+pOr = cOr <$ string "or"
 
 pApp :: Parser Term
-pApp = parens $ TmApp <$> pExpr <*> pExpr
+pApp = parens $ foldl1 (<+>) <$> many pExpr
