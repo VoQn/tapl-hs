@@ -18,12 +18,10 @@ parseExpr = parse (pContents pExpr) "<stdin>"
 pContents :: Parser a -> Parser a
 pContents p = many space *> p <* eof
 
-pCall :: String -> Parser a -> Parser a
-pCall fn p = parens $ string fn *> p
-
 pExpr :: Parser Term
 pExpr = whitespace pTerm
 
+(<||>) :: Parser a -> Parser a -> Parser a
 p1 <||> p2 = try p1 <|> p2
 
 pTerm :: Parser Term
