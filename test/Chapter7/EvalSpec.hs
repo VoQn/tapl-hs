@@ -33,7 +33,7 @@ spec = do
 
     it "eval1 (tru $ \\ x x) => (\\ f $ \\ x x)" $
       eval1 [] (cTru <+> cIdn "x") `shouldBe`
-      Right (TmAbs "f" . TmAbs "x" $ TmVar 0 2)
+      Right ("f" +> shift 1 cId)
 
   describe "eval" $ do
 
@@ -103,6 +103,25 @@ spec = do
       it "eval (or fls fls) => fls" $ do
         let expr = cOr <+> cFls <+> cFls
         eval [] expr `shouldBe` Right cFls
+
+    describe "(pair)/(fst)/(snd)" $ do
+
+      it "eval (pair) => pair" $
+        eval [] cPair `shouldBe` Right cPair
+
+      it "eval (fst) => fst" $
+        eval [] cFst `shouldBe` Right cFst
+
+      it "eval (snd) => snd" $
+        eval [] cSnd `shouldBe` Right cSnd
+
+      it "eval (fst (pair (\\ v v) (\\ w w))) => (\\ v v)" $
+        eval [] (cFst <+> (cPair <+> cIdn "v" <+> cIdn "w")) `shouldBe`
+        Right (cIdn "v")
+
+      it "eval (snd (pair (\\ v v) (\\ w w))) => (\\ w w)" $
+        eval [] (cSnd <+> (cPair <+> cIdn "v" <+> cIdn "w")) `shouldBe`
+        Right (cIdn "w")
 
   describe "Terminate" $ do
 
