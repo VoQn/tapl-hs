@@ -29,7 +29,7 @@ pTerm
   =    pId
   <||> pTru
   <||> pFls
-  <||> pTest
+  <||> pTst
   <||> pAnd
   <||> pOr
   <||> pApp
@@ -43,8 +43,8 @@ pTru = cTru <$ string "tru"
 pFls :: Parser Term
 pFls = cFls <$ string "fls"
 
-pTest :: Parser Term
-pTest = cTest <$ string "test"
+pTst :: Parser Term
+pTst = cTst <$ string "tst"
 
 pAnd :: Parser Term
 pAnd = cAnd <$ string "and"

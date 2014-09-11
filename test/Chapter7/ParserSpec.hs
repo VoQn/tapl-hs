@@ -24,7 +24,7 @@ spec = do
       parseExpr "fls" `shouldBe` Right cFls
 
     it "(test)" $
-      parseExpr "test" `shouldBe` Right cTest
+      parseExpr "tst" `shouldBe` Right cTst
 
     it "(and)" $
       parseExpr "and" `shouldBe` Right cAnd
@@ -34,10 +34,10 @@ spec = do
 
   describe "parse function call" $ do
 
-    it "(((test tru) id) id)" $
-      parseExpr "(((test tru) id) id)" `shouldBe`
-      Right (cTest <+> cTru <+> cId <+> cId)
+    it "(((tst tru) id) id)" $
+      parseExpr "(((tst tru) id) id)" `shouldBe`
+      Right (cTst <+> cTru <+> cId <+> cId)
 
     it "(test tru id id)" $
-      parseExpr "(test tru id id)" `shouldBe`
-      Right (cTest <+> cTru <+> cId <+> cId)
+      parseExpr "(tst tru id id)" `shouldBe`
+      Right (cTst <+> cTru <+> cId <+> cId)
