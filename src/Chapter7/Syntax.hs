@@ -65,11 +65,11 @@ cFls = "t" +> "f" +> 0 <+ 2
 cTest :: Term
 cTest = "l" +> "m" +> "n" +> (2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3)
 
--- Church and ... λb.λc.b c fls (λ.λ.1 0 fls)
+-- Church and ... λb.λc.b c fls (λ.λ.1 0 2↑fls)
 cAnd :: Term
 cAnd = "b" +> "c" +> (1 <+ 2) <+> (0 <+ 2) <+> shift 2 cFls
 
--- Church or  ... λb.λc.b c tru (λ.λ.1 0 tru)
+-- Church or  ... λb.λc.b c tru (λ.λ.1 0 ２↑tru)
 cOr :: Term
 cOr = "b" +> "c" +> (1 <+ 2) <+> shift 2 cTru <+> (0 <+ 2)
 
