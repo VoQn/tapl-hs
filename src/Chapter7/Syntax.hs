@@ -67,11 +67,11 @@ cTest = "l" +> "m" +> "n" +> (2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3)
 
 -- Church and ... λb.λc.b c fls (λ.λ.1 0 2↑fls)
 cAnd :: Term
-cAnd = "b" +> "c" +> (1 <+ 2) <+> (0 <+ 2) <+> shift 2 cFls
+cAnd = "b" +> "c" +> (1 <+ 2) <+> (0 <+ 2) <+> 2 -^ cFls
 
 -- Church or  ... λb.λc.b c tru (λ.λ.1 0 ２↑tru)
 cOr :: Term
-cOr = "b" +> "c" +> (1 <+ 2) <+> shift 2 cTru <+> (0 <+ 2)
+cOr = "b" +> "c" +> (1 <+ 2) <+> 2 -^ cTru <+> (0 <+ 2)
 
 -------------------------------------------------------------------------------
 -- Pair
@@ -83,11 +83,11 @@ cPair = "f" +> "s" +> "b" +> (0 <+ 3) <+> (2 <+ 3) <+> (1 <+ 3)
 
 -- Church fst  ... λp.p tru (λ.0 1↑tru)
 cFst :: Term
-cFst = "p" +> (0 <+ 1) <+> shift 1 cTru
+cFst = "p" +> (0 <+ 1) <+> 1 -^ cTru
 
 -- Church snd  ... λp.p fls (λ.0 1↑fls)
 cSnd :: Term
-cSnd = "p" +> (0 <+ 1) <+> shift 1 cFls
+cSnd = "p" +> (0 <+ 1) <+> 1 -^ cFls
 
 -------------------------------------------------------------------------------
 -- Number
@@ -106,7 +106,7 @@ cScc = "n" +> "s" +> "z" +> (1 <+ 3) <+> ((2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3))
 
 -- Church isZero ... λm.m (λx.fls) tru (λ.0 (λ.2↑fls) 1↑tru)
 cIsZro :: Term
-cIsZro = "m" +> (0 <+ 1) <+> ("x" +> shift 2 cFls) <+> shift 1 cTru
+cIsZro = "m" +> (0 <+ 1) <+> ("x" +> 2 -^ cFls) <+> 1 -^ cTru
 
 -------------------------------------------------------------------------------
 -- Display Term & Error
@@ -188,6 +188,10 @@ shift d = walk 0
       | i >= l    -> i + d <+ l + d
       | otherwise -> i <+ l + d
 
+(-^) :: Int -> Term -> Term
+d -^ t = shift d t
+infix 9 -^
+
 subst :: Int -> Term -> Term -> Term
 subst j s = walk 0
   where
@@ -196,9 +200,9 @@ subst j s = walk 0
     TmAbs x t   -> x +> walk (c + 1) t
     TmApp t1 t2 -> walk c t1 <+> walk c t2
     TmVar i l
-      | i == j + c -> shift c s
+      | i == j + c -> c -^ s
       | otherwise  -> i <+ l
 
 substTop :: Term -> Term -> Term
 substTop s =
-  shift (-1) . subst 0 (shift 1 s)
+  ((-1) -^) . subst 0 (1 -^ s)
