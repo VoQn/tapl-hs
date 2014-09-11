@@ -33,7 +33,7 @@ spec = do
 
     it "eval1 (tru $ \\ x x) => (\\ f $ \\ x x)" $
       eval1 [] (cTru <+> cIdn "x") `shouldBe`
-      Right ("f" +> shift 1 cId)
+      Right ("f" +> 1 -^ cId)
 
   describe "eval" $ do
 
