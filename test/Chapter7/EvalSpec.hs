@@ -123,6 +123,26 @@ spec = do
         eval [] (cSnd <+> (cPair <+> cIdn "v" <+> cIdn "w")) `shouldBe`
         Right (cIdn "w")
 
+    describe "(zero)/(one)/(succ)/(zero?)" $ do
+
+      it "eval (zero) => zero" $
+        eval [] cZro `shouldBe` Right cZro
+
+      it "eval (one) => zero" $
+        eval [] cOne `shouldBe` Right cOne
+
+      it "eval (succ) => succ" $
+        eval [] cScc `shouldBe` Right cScc
+
+      it "eval (zero?) => zero?" $
+        eval [] cIsZro `shouldBe` Right cIsZro
+
+      it "eval (zero? zero) => tru" $
+        eval [] (cIsZro <+> cZro) `shouldBe` Right cTru
+
+      it "eval (zero? (succ zero)) => fls" $
+        eval [] (cIsZro <+> (cScc <+> cZro)) `shouldBe` Right cFls
+
   describe "Terminate" $ do
 
     it "can display own expression" $ do
