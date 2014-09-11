@@ -81,11 +81,11 @@ cOr = "b" +> "c" +> (1 <+ 2) <+> shift 2 cTru <+> (0 <+ 2)
 cPair :: Term
 cPair = "f" +> "s" +> "b" +> (0 <+ 3) <+> (2 <+ 3) <+> (1 <+ 3)
 
--- Church fst  ... λp.p tru (λ.0 tru)
+-- Church fst  ... λp.p tru (λ.0 1↑tru)
 cFst :: Term
 cFst = "p" +> (0 <+ 1) <+> shift 1 cTru
 
--- Church snd  ... λp.p fls (λ.0 fls)
+-- Church snd  ... λp.p fls (λ.0 1↑fls)
 cSnd :: Term
 cSnd = "p" +> (0 <+ 1) <+> shift 1 cFls
 
@@ -104,7 +104,7 @@ cOne = "s" +> "z" +> (1 <+ 2) <+> (0 <+ 2)
 cScc :: Term
 cScc = "n" +> "s" +> "z" +> (1 <+ 3) <+> ((2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3))
 
--- Church isZero ... λm.m (λx. fls) tru
+-- Church isZero ... λm.m (λx.fls) tru (λ.0 (λ.2↑fls) 1↑tru)
 cIsZro :: Term
 cIsZro = "m" +> (0 <+ 1) <+> ("x" +> shift 2 cFls) <+> shift 1 cTru
 
