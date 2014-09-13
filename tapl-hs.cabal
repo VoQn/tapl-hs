@@ -30,6 +30,10 @@ library
                     Chapter4.Syntax,
                     Chapter4.Eval,
                     Chapter7.Syntax,
+                    Chapter7.Syntax.Term,
+                    Chapter7.Syntax.Context,
+                    Chapter7.Syntax.Exception,
+                    Chapter7.Syntax.BuiltinFuncs,
                     Chapter7.Eval,
                     Chapter7.Parser
 

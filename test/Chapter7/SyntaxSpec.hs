@@ -33,7 +33,7 @@ spec = do
 
       it "cannot find variable by out-of-context index" $ do
         let ctx = [("x",NameBind)]
-        indexToName ctx 0 2 `shouldBe` Left (WrongContextLength 0 2 1)
+        indexToName ctx 0 2 `shouldBe` Left (WrongContextDepth 0 2 1)
 
       it "cannot find from empty context" $ do
         let ctx = []
@@ -84,7 +84,7 @@ spec = do
         "[UNBOUND_ID] Identifier \"z\" is unbound"
 
       it "wrong index case : (\\.1)" $
-        toDisplay (WrongContextLength 1 1 0) `shouldBe`
+        toDisplay (WrongContextDepth 1 1 0) `shouldBe`
         "[BAD_INDEX] Value has wrong index (index: 1, length: 1)\n" <>
         "[INFO] Context has (length: 0)"
 
