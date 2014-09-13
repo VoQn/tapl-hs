@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase, OverloadedStrings #-}
 module Chapter7.Syntax.Exception where
 
+import qualified Data.Text.Lazy.Builder as LB
 import Data.Monoid
 import Data.Display
 import Chapter7.Syntax.Term
@@ -26,3 +27,6 @@ instance Display RuntimeException where
 
     UnboundIdentifier n ->
       "[UNBOUND_ID] Identifier \"" <> toDisplay n <> "\" is unbound"
+
+eitherDisplay :: (Display a, Display b) => Either a b -> LB.Builder
+eitherDisplay = either toDisplay toDisplay

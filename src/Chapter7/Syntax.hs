@@ -52,7 +52,4 @@ withContext c (TmVar i l) =
   eitherDisplay $ indexToName c i l
 
 disp :: Context -> Term -> LB.Builder
-disp c t = toDisplay $ withContext c t
-
-eitherDisplay :: (Display a, Display b) => Either a b -> LB.Builder
-eitherDisplay = either toDisplay toDisplay
+disp c = toDisplay . withContext c
