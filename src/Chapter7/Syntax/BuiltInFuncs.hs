@@ -1,6 +1,25 @@
 module Chapter7.Syntax.BuiltinFuncs where
 
+import Data.Map (Map)
+import qualified Data.Map as Map
 import Chapter7.Syntax.Term
+
+builtIns :: Map Name Term
+builtIns = Map.fromList $
+  [ ("id",  cId)
+  , ("tru", cTru)
+  , ("fls", cFls)
+  , ("tst", cTst)
+  , ("and", cAnd)
+  , ("or",  cOr)
+  , ("pir", cPir)
+  , ("fst", cFst)
+  , ("snd", cSnd)
+  , ("zro", cZro)
+  , ("one", cOne)
+  , ("scc", cScc)
+  , ("zro?", cIsZro)
+  ]
 
 -------------------------------------------------------------------------------
 -- Indentify

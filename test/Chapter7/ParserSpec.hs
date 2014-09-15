@@ -27,6 +27,10 @@ spec = do
       parseExpr "(\\ (x y z) y)" `shouldBe`
       Right ("x" +> "y" +> "z" +> 1 <+ 3)
 
+    it "(\\ (x y) (x y))" $
+      parseExpr "(\\ (x y) (x y))" `shouldBe`
+      Right ("x" +> "y" +> (1 <+ 2) <+> (0 <+ 2))
+
   describe "primitive functions" $ do
 
     it "(id)" $

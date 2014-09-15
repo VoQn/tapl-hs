@@ -1,6 +1,7 @@
 module Chapter7.Parser where
 
 import Control.Applicative hiding ((<|>), many)
+import qualified Data.Map as Map
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
@@ -35,18 +36,43 @@ pTerm
   <||> pOr
   <||> pApp
 
+-- |
+-- Parse Lambda Expression
+-- (\\ x x) => λx.x (λ.0)
+-- (\\ (x y) x) => λxy.x (λ.1)
+-- (\\ (x y z a) x) => λxyza.x (λ.3)
+-- (\\ (f g) (g f)) => λfg.(g f) (λ.0 1)
 pLam :: Parser Term
 pLam = parens $ do
-  _ <- char '\\'
-  _ <- many space
-  vn <- parens (many $ whitespace tId) <||> ((:[]) <$> tId)
-  ex <- whitespace tId
-  return $ expr (length vn) 1 vn ex
+  _   <- char '\\'
+  ctx <- mkCtx [] <$> vars
+  bdy <- bodyExpr ctx <$> vars
+  return $ ctx `apply` bdy
   where
-  expr _ _ [] _ = undefined
-  expr l c (x:xs) e
-    | x == e = foldr (+>) (l - c <+ l) (x:xs)
-    | otherwise = x +> (expr l (c + 1) xs e)
+  vars :: Parser [Name]
+  vars = whitespace $ cplx <||> smpl
+  cplx = parens $ many1 $ whitespace tId
+  smpl = (:[]) <$> tId
+
+  mkCtx :: Context -> [Name] -> Context
+  mkCtx rs [] = rs
+  mkCtx rs (x:xs) = mkCtx ((x, NameBind) : rs) xs
+
+  bodyExpr :: Context -> [Name] -> Term
+  bodyExpr ctx es =
+    let l = length ctx in
+    case mapM (lkup ctx l) es of
+      Just xs -> foldl1 (<+>) xs
+      Nothing -> undefined
+
+  lkup :: Context -> Int -> Name -> Maybe Term
+  lkup ctx l e = case nameToIndex ctx e of
+    Right i -> Just $ i <+ l
+    Left  _ -> Map.lookup e builtIns
+
+  apply :: Context -> Term -> Term
+  apply ctx e = foldr (\l r -> (fst l) +> r) e (reverse ctx)
+
 
 tId :: Parser Name
 tId = (:) <$> letter <*> many alphaNum
