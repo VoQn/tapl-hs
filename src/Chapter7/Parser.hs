@@ -26,13 +26,30 @@ p1 <||> p2 = try p1 <|> p2
 
 pTerm :: Parser Term
 pTerm
-  =    pId
+  =    pLam
+  <||> pId
   <||> pTru
   <||> pFls
   <||> pTst
   <||> pAnd
   <||> pOr
   <||> pApp
+
+pLam :: Parser Term
+pLam = parens $ do
+  _ <- char '\\'
+  _ <- many space
+  vn <- parens (many $ whitespace tId) <||> ((:[]) <$> tId)
+  ex <- whitespace tId
+  return $ expr (length vn) 1 vn ex
+  where
+  expr _ _ [] _ = undefined
+  expr l c (x:xs) e
+    | x == e = foldr (+>) (l - c <+ l) (x:xs)
+    | otherwise = x +> (expr l (c + 1) xs e)
+
+tId :: Parser Name
+tId = (:) <$> letter <*> many alphaNum
 
 pId :: Parser Term
 pId = cId <$ string "id"

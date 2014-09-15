@@ -12,6 +12,21 @@ instance Eq ParseError where
 
 spec :: Spec
 spec = do
+
+  describe "lambda expression" $ do
+
+    it "(\\ x x)" $
+      parseExpr "(\\ x x)" `shouldBe`
+      Right ("x" +> 0 <+ 1)
+
+    it "(\\ (x y) y)" $
+      parseExpr "(\\ (x y) y)" `shouldBe`
+      Right ("x" +> "y" +> 0 <+ 2)
+
+    it "(\\ (x y z) y)" $
+      parseExpr "(\\ (x y z) y)" `shouldBe`
+      Right ("x" +> "y" +> "z" +> 1 <+ 3)
+
   describe "primitive functions" $ do
 
     it "(id)" $
