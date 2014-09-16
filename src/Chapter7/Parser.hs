@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Chapter7.Parser where
 
 import Control.Applicative hiding ((<|>), many)
@@ -23,7 +22,7 @@ pExpr :: Context -> Parser Term
 pExpr ctx = whitespace $ pTerm ctx
 
 (<||>) :: Parser a -> Parser a -> Parser a
-p1 <||> p2 = try p1 <|> p2
+(<||>) p1 p2 = try p1 <|> p2
 
 pTerm :: Context -> Parser Term
 pTerm ctx
@@ -74,11 +73,6 @@ manyVar = parens $ many1 $ whitespace tId
 
 uniqVar :: Parser [Name]
 uniqVar = (:[]) <$> tId
-
-(+:+) :: Context -> [Name] -> Context
-(+:+) cx = \case
-  []     -> cx
-  (n:ns) -> ((n, NameBind):cx) +:+ ns
 
 -- |
 -- Parse Lambda Expression

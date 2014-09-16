@@ -10,10 +10,6 @@ data Term
   | TmApp Term Term
   deriving (Eq, Show)
 
-data Binding
-  = NameBind
-  deriving (Eq, Show)
-
 (<+) :: Int -> Int -> Term
 i <+ l = TmVar i l
 infix 4 <+
