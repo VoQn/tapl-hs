@@ -73,9 +73,24 @@ pLam = parens $ do
   apply :: Context -> Term -> Term
   apply ctx e = foldr (\l r -> (fst l) +> r) e (reverse ctx)
 
+pVar :: Context -> Parser Term
+pVar ctx = do
+  let l = length ctx
+  n <- tId
+  return $ case nameToIndex ctx n of
+    Right i -> i <+ l
+    Left  _ -> TmFree n
+
+pApp' :: Context -> Parser Term
+pApp' ctx = parens $ do
+  vs <- many $ whitespace $ pVar ctx
+  return $ foldr1 (<+>) vs
 
 tId :: Parser Name
-tId = (:) <$> letter <*> many alphaNum
+tId = (:) <$> letter <*> many (alphaNum <||> tSym)
+
+tSym :: Parser Char
+tSym = oneOf "+-?:$#<>"
 
 pId :: Parser Term
 pId = cId <$ string "id"

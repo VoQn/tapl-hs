@@ -4,7 +4,8 @@ module Chapter7.Syntax.Term where
 type Name = String
 
 data Term
-  = TmVar Int Int     -- TmVar { index :: Int, depth :: Int }
+  = TmFree Name
+  | TmVar Int Int     -- TmVar { index :: Int, depth :: Int }
   | TmAbs Name Term
   | TmApp Term Term
   deriving (Eq, Show)
