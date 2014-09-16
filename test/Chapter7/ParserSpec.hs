@@ -76,29 +76,29 @@ spec = do
   describe "primitive functions" $ do
 
     it "(id)" $
-      parseExpr "id" `shouldBe` Right cId
+      parseExpr "id" `shouldBe` Right (TmFree "id")
 
     it "(tru)" $
-      parseExpr "tru" `shouldBe` Right cTru
+      parseExpr "tru" `shouldBe` Right (TmFree "tru")
 
     it "(fls)" $
-      parseExpr "fls" `shouldBe` Right cFls
+      parseExpr "fls" `shouldBe` Right (TmFree "fls")
 
     it "(test)" $
-      parseExpr "tst" `shouldBe` Right cTst
+      parseExpr "tst" `shouldBe` Right (TmFree "tst")
 
     it "(and)" $
-      parseExpr "and" `shouldBe` Right cAnd
+      parseExpr "and" `shouldBe` Right (TmFree "and")
 
     it "(or)" $
-      parseExpr "or" `shouldBe` Right cOr
+      parseExpr "or" `shouldBe` Right (TmFree "or")
 
   describe "parse function call" $ do
 
     it "(((tst tru) id) id)" $
       parseExpr "(((tst tru) id) id)" `shouldBe`
-      Right (cTst <+> cTru <+> cId <+> cId)
+      Right (TmFree "tst" <+> TmFree "tru" <+> TmFree "id" <+> TmFree "id")
 
     it "(test tru id id)" $
       parseExpr "(tst tru id id)" `shouldBe`
-      Right (cTst <+> cTru <+> cId <+> cId)
+      Right (TmFree "tst" <+> TmFree "tru" <+> TmFree "id" <+> TmFree "id")

@@ -4,6 +4,7 @@ import Chapter7.Syntax.Term
 -------------------------------------------------------------------------------
 -- Context (Varibale's Name : State)
 -------------------------------------------------------------------------------
+data Binding = NameBind deriving (Eq, Show)
 
 type Context = [(Name, Binding)]
 
@@ -18,3 +19,8 @@ isNameBound c n = case c of
   (y:ys)
     | fst y == n -> True
     | otherwise  -> isNameBound ys n
+
+(+:+) :: Context -> [Name] -> Context
+(+:+) cx xs = case xs of
+  []     -> cx
+  (n:ns) -> ((n, NameBind):cx) +:+ ns

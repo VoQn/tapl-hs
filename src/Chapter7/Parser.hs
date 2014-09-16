@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Chapter7.Parser where
 
 import Control.Applicative hiding ((<|>), many)
@@ -23,17 +22,11 @@ pExpr :: Context -> Parser Term
 pExpr ctx = whitespace $ pTerm ctx
 
 (<||>) :: Parser a -> Parser a -> Parser a
-p1 <||> p2 = try p1 <|> p2
+(<||>) p1 p2 = try p1 <|> p2
 
 pTerm :: Context -> Parser Term
 pTerm ctx
-  =    pId
-  <||> pTru
-  <||> pFls
-  <||> pTst
-  <||> pAnd
-  <||> pOr
-  <||> pVar ctx
+  =    pVar ctx
   <||> pApp ctx
   <||> pAbs ctx
 
@@ -42,24 +35,6 @@ tId = (:) <$> letter <*> many (alphaNum <||> tSym)
 
 tSym :: Parser Char
 tSym = oneOf "+-?:$#<>"
-
-pId :: Parser Term
-pId = cId <$ string "id"
-
-pTru :: Parser Term
-pTru = cTru <$ string "tru"
-
-pFls :: Parser Term
-pFls = cFls <$ string "fls"
-
-pTst :: Parser Term
-pTst = cTst <$ string "tst"
-
-pAnd :: Parser Term
-pAnd = cAnd <$ string "and"
-
-pOr :: Parser Term
-pOr = cOr <$ string "or"
 
 pVar :: Context -> Parser Term
 pVar ctx = do
@@ -74,11 +49,6 @@ manyVar = parens $ many1 $ whitespace tId
 
 uniqVar :: Parser [Name]
 uniqVar = (:[]) <$> tId
-
-(+:+) :: Context -> [Name] -> Context
-(+:+) cx = \case
-  []     -> cx
-  (n:ns) -> ((n, NameBind):cx) +:+ ns
 
 -- |
 -- Parse Lambda Expression

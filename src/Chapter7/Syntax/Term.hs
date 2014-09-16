@@ -10,10 +10,6 @@ data Term
   | TmApp Term Term
   deriving (Eq, Show)
 
-data Binding
-  = NameBind
-  deriving (Eq, Show)
-
 (<+) :: Int -> Int -> Term
 i <+ l = TmVar i l
 infix 4 <+
@@ -35,6 +31,7 @@ shift d = walk 0
   where
   walk :: Int -> Term -> Term
   walk c = \case
+    v@(TmFree _) -> v
     TmAbs x t   -> x +> walk (c + 1) t
     TmApp t1 t2 -> walk c t1 <+> walk c t2
     TmVar i l
@@ -50,6 +47,7 @@ subst j s = walk 0
   where
   walk :: Int -> Term -> Term
   walk c = \case
+    v@(TmFree _) -> v
     TmAbs x t   -> x +> walk (c + 1) t
     TmApp t1 t2 -> walk c t1 <+> walk c t2
     TmVar i l
