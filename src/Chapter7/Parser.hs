@@ -26,13 +26,7 @@ pExpr ctx = whitespace $ pTerm ctx
 
 pTerm :: Context -> Parser Term
 pTerm ctx
-  =    pId
-  <||> pTru
-  <||> pFls
-  <||> pTst
-  <||> pAnd
-  <||> pOr
-  <||> pVar ctx
+  =    pVar ctx
   <||> pApp ctx
   <||> pAbs ctx
 
@@ -41,24 +35,6 @@ tId = (:) <$> letter <*> many (alphaNum <||> tSym)
 
 tSym :: Parser Char
 tSym = oneOf "+-?:$#<>"
-
-pId :: Parser Term
-pId = cId <$ string "id"
-
-pTru :: Parser Term
-pTru = cTru <$ string "tru"
-
-pFls :: Parser Term
-pFls = cFls <$ string "fls"
-
-pTst :: Parser Term
-pTst = cTst <$ string "tst"
-
-pAnd :: Parser Term
-pAnd = cAnd <$ string "and"
-
-pOr :: Parser Term
-pOr = cOr <$ string "or"
 
 pVar :: Context -> Parser Term
 pVar ctx = do

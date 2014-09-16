@@ -4,8 +4,8 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import Chapter7.Syntax.Term
 
-builtIns :: Map Name Term
-builtIns = Map.fromList $
+builtinFuncs :: Map Name Term
+builtinFuncs = Map.fromList $
   [ ("id",  cId)
   , ("tru", cTru)
   , ("fls", cFls)
