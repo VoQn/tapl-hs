@@ -52,9 +52,9 @@ spec = do
       parseExpr "(\\ (x y z) (z y x))" `shouldBe`
       Right ("x" +> "y" +> "z" +> (0 <+ 3) <+> (1 <+ 3) <+> (2 <+ 3))
 
-    --it "(\\ (x y z) (x (y z)))" $
-    --  parseExpr "(\\ (x y z) (x (y z)))" `shouldBe`
-    --  Right ("x" +> "y" +> "z" +> (2 <+ 3) <+> ((1 <+ 3) <+> (0 <+ 3)))
+    it "(\\ (x y z) (x (y z)))" $
+      parseExpr "(\\ (x y z) (x (y z)))" `shouldBe`
+      Right ("x" +> "y" +> "z" +> (2 <+ 3) <+> ((1 <+ 3) <+> (0 <+ 3)))
 
   describe "primitive functions" $ do
 
