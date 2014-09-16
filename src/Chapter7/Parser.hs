@@ -26,13 +26,56 @@ p1 <||> p2 = try p1 <|> p2
 
 pTerm :: Parser Term
 pTerm
-  =    pId
+  =    pLam
+  <||> pId
   <||> pTru
   <||> pFls
-  <||> pTest
+  <||> pTst
   <||> pAnd
   <||> pOr
   <||> pApp
+
+-- |
+-- Parse Lambda Expression
+-- (\\ x x) => λx.x (λ.0)
+-- (\\ (x y) x) => λxy.x (λ.1)
+-- (\\ (x y z a) x) => λxyza.x (λ.3)
+-- (\\ (f g) (g f)) => λfg.(g f) (λ.0 1)
+pLam :: Parser Term
+pLam = parens $ do
+  _   <- char '\\'
+  ags <- whitespace $ cplx <||> smpl
+  let ctx = mkCtx ags
+  bdy <- whitespace $ pApp' ctx <||> pVar ctx
+  return $ foldr (+>) bdy ags
+  where
+  cplx :: Parser [Name]
+  cplx = parens $ many1 $ whitespace tId
+
+  smpl :: Parser [Name]
+  smpl = (:[]) <$> tId
+
+  mkCtx :: [Name] -> Context
+  mkCtx = map (\x -> (x, NameBind)) . reverse
+
+pVar :: Context -> Parser Term
+pVar ctx = do
+  let l = length ctx
+  n <- tId
+  return $ case nameToIndex ctx n of
+    Right i -> i <+ l
+    Left  _ -> TmFree n
+
+pApp' :: Context -> Parser Term
+pApp' ctx = foldl1 (<+>) <$> parens vars
+  where
+  vars = many $ whitespace $ pApp' ctx <||> pVar ctx
+
+tId :: Parser Name
+tId = (:) <$> letter <*> many (alphaNum <||> tSym)
+
+tSym :: Parser Char
+tSym = oneOf "+-?:$#<>"
 
 pId :: Parser Term
 pId = cId <$ string "id"
@@ -43,8 +86,8 @@ pTru = cTru <$ string "tru"
 pFls :: Parser Term
 pFls = cFls <$ string "fls"
 
-pTest :: Parser Term
-pTest = cTest <$ string "test"
+pTst :: Parser Term
+pTst = cTst <$ string "tst"
 
 pAnd :: Parser Term
 pAnd = cAnd <$ string "and"

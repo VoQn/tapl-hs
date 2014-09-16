@@ -52,14 +52,14 @@ spec = do
 
     describe "(test)" $ do
       it "eval (test) => test" $ do
-        eval [] cTest `shouldBe` Right cTest
+        eval [] cTst `shouldBe` Right cTst
 
       it "eval (test tru v w) => v" $ do
-        let expr = cTest <+> cTru <+> cIdn "v" <+> cIdn "w"
+        let expr = cTst <+> cTru <+> cIdn "v" <+> cIdn "w"
         eval [] expr `shouldBe` Right (cIdn "v")
 
       it "eval (test fls v w) => w" $ do
-        let expr = cTest <+> cFls <+> cIdn "v" <+> cIdn "w"
+        let expr = cTst <+> cFls <+> cIdn "v" <+> cIdn "w"
         eval [] expr `shouldBe` Right (cIdn "w")
 
     describe "(and)" $ do
@@ -107,7 +107,7 @@ spec = do
     describe "(pair)/(fst)/(snd)" $ do
 
       it "eval (pair) => pair" $
-        eval [] cPair `shouldBe` Right cPair
+        eval [] cPir `shouldBe` Right cPir
 
       it "eval (fst) => fst" $
         eval [] cFst `shouldBe` Right cFst
@@ -116,11 +116,11 @@ spec = do
         eval [] cSnd `shouldBe` Right cSnd
 
       it "eval (fst (pair (\\ v v) (\\ w w))) => (\\ v v)" $
-        eval [] (cFst <+> (cPair <+> cIdn "v" <+> cIdn "w")) `shouldBe`
+        eval [] (cFst <+> (cPir <+> cIdn "v" <+> cIdn "w")) `shouldBe`
         Right (cIdn "v")
 
       it "eval (snd (pair (\\ v v) (\\ w w))) => (\\ w w)" $
-        eval [] (cSnd <+> (cPair <+> cIdn "v" <+> cIdn "w")) `shouldBe`
+        eval [] (cSnd <+> (cPir <+> cIdn "v" <+> cIdn "w")) `shouldBe`
         Right (cIdn "w")
 
     describe "(zero)/(one)/(succ)/(zero?)" $ do
