@@ -15,7 +15,7 @@ parseVar :: Context -> String -> Either ParseError Term
 parseVar ctx = parse (pVar ctx) "<test>"
 
 parseApp :: Context -> String -> Either ParseError Term
-parseApp ctx = parse (pApp' ctx) "<test>"
+parseApp ctx = parse (pApp ctx) "<test>"
 
 spec :: Spec
 spec = do
@@ -29,6 +29,15 @@ spec = do
     it "[z, y, z] (x y)" $ do
       let ctx = [("z", NameBind), ("y", NameBind), ("x", NameBind)]
       parseApp ctx "(x y)" `shouldBe` Right ((2 <+ 3) <+> (1 <+ 3))
+
+    it "[y, x] (v)" $ do
+      let ctx = [("y",NameBind),("x",NameBind)]
+      parseVar ctx "v" `shouldBe` Right (TmFree "v")
+
+    it "[z, y, x] (w x y z)" $ do
+      let ctx = [("z", NameBind), ("y", NameBind), ("x", NameBind)]
+      parseApp ctx "(w x y z)" `shouldBe`
+        Right (TmFree "w" <+> (2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3))
 
   describe "lambda expression" $ do
 
@@ -55,6 +64,14 @@ spec = do
     it "(\\ (x y z) (x (y z)))" $
       parseExpr "(\\ (x y z) (x (y z)))" `shouldBe`
       Right ("x" +> "y" +> "z" +> (2 <+ 3) <+> ((1 <+ 3) <+> (0 <+ 3)))
+
+    it "(\\ x (\\ y y))" $
+      parseExpr "(\\ x (\\ y y))" `shouldBe`
+      Right ("x" +> "y" +> 0 <+ 2)
+
+    it "(\\ x (\\ y (x y)))" $
+      parseExpr "(\\ x (\\ y (x y)))" `shouldBe`
+      Right ("x" +> "y" +> (1 <+ 2) <+> (0 <+ 2))
 
   describe "primitive functions" $ do
 

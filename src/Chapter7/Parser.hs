@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Chapter7.Parser where
 
 import Control.Applicative hiding ((<|>), many)
@@ -13,63 +14,28 @@ parens :: Parser a -> Parser a
 parens p = char '(' *> whitespace p <* whitespace (char ')')
 
 parseExpr :: String -> Either ParseError Term
-parseExpr = parse (pContents pExpr) "<stdin>"
+parseExpr = parse (pContents $ pExpr []) "<stdin>"
 
 pContents :: Parser a -> Parser a
 pContents p = many space *> p <* eof
 
-pExpr :: Parser Term
-pExpr = whitespace pTerm
+pExpr :: Context -> Parser Term
+pExpr ctx = whitespace $ pTerm ctx
 
 (<||>) :: Parser a -> Parser a -> Parser a
 p1 <||> p2 = try p1 <|> p2
 
-pTerm :: Parser Term
-pTerm
-  =    pLam
-  <||> pId
+pTerm :: Context -> Parser Term
+pTerm ctx
+  =    pId
   <||> pTru
   <||> pFls
   <||> pTst
   <||> pAnd
   <||> pOr
-  <||> pApp
-
--- |
--- Parse Lambda Expression
--- (\\ x x) => λx.x (λ.0)
--- (\\ (x y) x) => λxy.x (λ.1)
--- (\\ (x y z a) x) => λxyza.x (λ.3)
--- (\\ (f g) (g f)) => λfg.(g f) (λ.0 1)
-pLam :: Parser Term
-pLam = parens $ do
-  _   <- char '\\'
-  ags <- whitespace $ cplx <||> smpl
-  let ctx = mkCtx ags
-  bdy <- whitespace $ pApp' ctx <||> pVar ctx
-  return $ foldr (+>) bdy ags
-  where
-  cplx :: Parser [Name]
-  cplx = parens $ many1 $ whitespace tId
-
-  smpl :: Parser [Name]
-  smpl = (:[]) <$> tId
-
-  mkCtx :: [Name] -> Context
-  mkCtx = map (\x -> (x, NameBind)) . reverse
-
-pVar :: Context -> Parser Term
-pVar ctx = do
-  let l = length ctx
-  n <- tId
-  return $ case nameToIndex ctx n of
-    Right i -> i <+ l
-    Left  _ -> TmFree n
-
-pApp' :: Context -> Parser Term
-pApp' ctx = foldl1 (<+>) <$> parens vars
-  where
-  vars = many $ whitespace $ pApp' ctx <||> pVar ctx
+  <||> pVar ctx
+  <||> pApp ctx
+  <||> pAbs ctx
 
 tId :: Parser Name
 tId = (:) <$> letter <*> many (alphaNum <||> tSym)
@@ -95,5 +61,43 @@ pAnd = cAnd <$ string "and"
 pOr :: Parser Term
 pOr = cOr <$ string "or"
 
-pApp :: Parser Term
-pApp = parens $ foldl1 (<+>) <$> many pExpr
+pVar :: Context -> Parser Term
+pVar ctx = do
+  let l = length ctx
+  n <- tId
+  return $ case nameToIndex ctx n of
+    Right i -> i <+ l
+    Left  _ -> TmFree n
+
+manyVar :: Parser [Name]
+manyVar = parens $ many1 $ whitespace tId
+
+uniqVar :: Parser [Name]
+uniqVar = (:[]) <$> tId
+
+(+:+) :: Context -> [Name] -> Context
+(+:+) cx = \case
+  []     -> cx
+  (n:ns) -> ((n, NameBind):cx) +:+ ns
+
+-- |
+-- Parse Lambda Expression
+-- (\\ x x) => λx.x (λ.0)
+-- (\\ (x y) x) => λxy.x (λ.1)
+-- (\\ (x y z a) x) => λxyza.x (λ.3)
+-- (\\ (f g) (g f)) => λfg.(g f) (λ.0 1)
+pAbs :: Context -> Parser Term
+pAbs ctx = parens form <?> "Lambda Expression (ex: (\\ (x y ...) (x ...))"
+  where
+  form :: Parser Term
+  form = do
+    _   <- char '\\'
+    ags <- whitespace $ manyVar <||> uniqVar
+    bdy <- pExpr $ ctx +:+ ags
+    return $ foldr (+>) bdy ags
+
+pApp :: Context -> Parser Term
+pApp ctx = parens form <?> "Function Apply (ex: (f x))"
+  where
+  form :: Parser Term
+  form = foldl1 (<+>) <$> many (pExpr ctx)
