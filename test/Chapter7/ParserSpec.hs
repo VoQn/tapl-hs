@@ -30,6 +30,15 @@ spec = do
       let ctx = [("z", NameBind), ("y", NameBind), ("x", NameBind)]
       parseApp ctx "(x y)" `shouldBe` Right ((2 <+ 3) <+> (1 <+ 3))
 
+    it "[y, x] (v)" $ do
+      let ctx = [("y",NameBind),("x",NameBind)]
+      parseVar ctx "v" `shouldBe` Right (TmFree "v")
+
+    it "[z, y, x] (w x y z)" $ do
+      let ctx = [("z", NameBind), ("y", NameBind), ("x", NameBind)]
+      parseApp ctx "(w x y z)" `shouldBe`
+        Right (TmFree "w" <+> (2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3))
+
   describe "lambda expression" $ do
 
     it "(\\ x x)" $
