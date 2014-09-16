@@ -51,5 +51,7 @@ withContext c (TmApp t1 t2) =
 withContext c (TmVar i l) =
   eitherDisplay $ indexToName c i l
 
+withContext _ (TmFree n) = toDisplay n
+
 disp :: Context -> Term -> LB.Builder
 disp c = toDisplay . withContext c
