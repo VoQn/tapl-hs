@@ -13,8 +13,15 @@ This is an exercise repository of Implement Programming language according to th
 > cabal configure
 > cabal build
 > cabal install
-> chapter4
-tapl>
+> tapl-hs
+TaPL-hs REPL
+========================================
+0) Exit
+1) Sarith (from Chapter 3-4)
+2) Sulamb (from Chapter 5-7)
+----------------------------------------
+Select Mode (default: 2) >> # enter language index (quit for 0)
+Sulamb>
 ```
 
 ### for Developers
@@ -24,11 +31,11 @@ tapl>
 > cabal configure --enable-tests --enable-library-coverage
 > cabal build
 > run-cabal-test --show-details=always
-> cabal run chapter4
+> cabal run
 ```
 
-## Sarith (by TaPL-Chapter-4)
-**Sarith** is programming language according to TaPL Chapter4
+## Sarith (by TaPL-Chapter.3-4)
+**Sarith** is programming language according to TaPL Chapter.3-4
 
 This language's syntax is like __scheme__
 ### Basic Values (true/false/0)
@@ -64,4 +71,70 @@ false ; boolean false
 (if false 0 (succ 0)) ; => (succ 0)
 
 (if 0 true false) ; => TypeError
+```
+
+## Sulamb (by TaPL-Chapter.5-7)
+**Sulamb** is programming language according to TaPL Chapter.5-7
+
+This language based on untype-lambda-calculus.
+All functions are auto curried.
+
+### Basics (id)
+```scheme
+(\ x x)     ; identity function
+
+(\ x (\ y y)) ; meaning λx.λy.y
+(\ (x y) y)   ; meaning λxy.y (the same as λx.λy.y)
+
+(f x) ; apply function `f` with `x`
+(\ (l m n) (l m n)) ; λlmn.l m n
+
+;; Example
+(id) ; => (\ x x)
+(id (\ y y)) ; => (\ y y)
+(id (id (\ w w))) ; => (\ w w)
+```
+
+### Bool (tru/fls/tst/and/or)
+```scheme
+(tru)       ; Church-true
+(fls)       ; Church-false
+(tst p t f) ; Church-if
+(and a b)   ; Church-and
+(or  a b)   ; Church-or
+
+;; Example
+(tru) ; => (\ t (\ f t))
+(fls) ; => (\ t (\ f f))
+(and tru tru) ; => tru
+(and fls tru) ; => fls
+(or fls fls)  ; => fls
+(or fls tru)  ; => tru
+
+(tst tru (\ v v) (\ w w)) ; => (\ v v)
+(tst fls (\ v v) (\ w w)) ; => (\ w w)
+```
+
+### Number (zrp/one/scc/zro?)
+```scheme
+(zro)    ; Church-zero
+(one)    ; Church-one
+(scc x)  ; Church-succ
+(zro? x) ; Church-zero?
+
+;; Example
+(zro? zro) ; => tru
+(zro? one) ; => fls
+(zro? (scc zro)) ; => fls
+```
+
+### Collection (pir/fst/snd)
+```scheme
+(pir v w) ; Church-pair constructor
+(fst p)   ; Church-fst
+(snd p)   ; Church-snd
+
+;; Example
+(fst (pir (\ v v) (\ w w))) ; => (\ v v)
+(snd (pir (\ v v) (\ w w))) ; => (\ w w)
 ```
