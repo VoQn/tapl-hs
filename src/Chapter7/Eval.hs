@@ -21,6 +21,9 @@ instance Display Terminate where
 
 isVal :: Context -> Term -> Bool
 isVal _ (TmAbs _ _) = True
+isVal _ (TmFree  n) = case Map.lookup n builtinFuncs of
+  Just _  -> True
+  Nothing -> False
 isVal _ _           = False
 
 eval1 :: Context -> Term -> Either Terminate Term

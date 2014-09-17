@@ -18,6 +18,12 @@ spec = do
     it "isVal \\.0 => False" $
       isVal [] (0 <+ 1) `shouldBe` False
 
+    it "isVal (id) => isVal (\\ x x) => True" $
+      isVal [] (TmFree "id") `shouldBe` True
+
+    it "isVal (undefinedFunc) => isVal #undefined => False" $
+      isVal [] (TmFree "undefinedFunc") `shouldBe` False
+
   describe "eval1" $ do
 
     it "eval1 id => NoRuleApplies" $
