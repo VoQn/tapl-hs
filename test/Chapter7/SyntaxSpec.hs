@@ -2,6 +2,8 @@
 module Chapter7.SyntaxSpec where
 
 import Test.Hspec
+import Test.Hspec.QuickCheck
+
 import Data.Monoid
 import Data.Display
 import Chapter7.Syntax
@@ -63,6 +65,9 @@ spec = do
         toDisplay (idt1 <+> idt2) `shouldBe`
           "((\\ x x) (\\ y y))"
 
+      it "free var \"foo\"" $ do
+        toDisplay (TmFree "foo") `shouldBe` "foo"
+
     describe "Error Handling" $ do
 
       it "variable has wrong context-length" $
@@ -104,6 +109,9 @@ spec = do
       it "shift 10 \\.0" $
         shift 10 (0 <+ 1) `shouldBe` (10 <+ 11)
 
+      prop "shift x (free v)" $ \n ->
+        shift n (TmFree "v") `shouldBe` (TmFree "v")
+
     describe "substitute varibales" $ do
 
       it "subst (((\\ x x) (\\ x x)) (\\ y y))" $ do
@@ -117,6 +125,9 @@ spec = do
 
       it "subst 1 \\.2(4) \\.1(5)" $
         subst 1 (2 <+ 4) (1 <+ 5) `shouldBe` (2 <+ 4)
+
+      prop "subst x (free v)" $ \x ->
+        subst x (0 <+ 1) (TmFree "v") `shouldBe` (TmFree "v")
 
     describe "substitute on Top Level" $ do
 
