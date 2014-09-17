@@ -36,7 +36,9 @@ library
                     Chapter7.Exception,
                     Chapter7.BuiltinFuncs,
                     Chapter7.Eval,
-                    Chapter7.Parser
+                    Chapter7.Parser,
+                    Chapter8,
+                    Chapter8.Syntax
 
 executable tapl-hs
   main-is:          Main.hs
