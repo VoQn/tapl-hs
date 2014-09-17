@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Main where
 
 import Chapter4 as Ch4
@@ -15,22 +16,21 @@ data REPL
 main :: IO ()
 main = runInputT defaultSettings repl
   where
-  repl = do
-    mode <- ask
-    case mode of
-      Halt -> outputStrLn "Goodbye"
-      _    -> loop mode
-  loop mode = do
-    expr <- getInputLine $ header mode
-    case expr of
-      Nothing -> outputStrLn "Goodbye"
-      Just input -> proc mode input >> loop mode
+  quit = outputStrLn "Goodbye"
+
+  repl = ask >>= \case
+    Halt -> quit
+    mode -> loop mode
+
+  loop mode = getInputLine (header mode) >>= \case
+    Nothing    -> quit
+    Just input -> proc mode input >> loop mode
 
 header :: REPL -> String
 header = (++ "> ") . show
 
 proc :: (MonadIO m) => REPL -> String -> m ()
-proc mode = case mode of
+proc = \case
   Sarith -> liftIO . Ch4.process
   Sulamb -> liftIO . Ch7.process
 
