@@ -91,24 +91,28 @@ spec = do
     describe "shift variable index" $ do
 
       it "shift (\\ x x)" $
-        shift 1 (TmAbs "x" $ TmVar 0 1) `shouldBe`
-        TmAbs "x" (TmVar 0 2)
+        shift 1 ("x" +> 0 <+ 1) `shouldBe`
+          ("x" +> 0 <+ 2)
 
-      it "shift (\\ x x)" $
-        shift 1 (TmAbs "x" $ TmAbs "y" $ TmVar 1 2) `shouldBe`
-        TmAbs "x" (TmAbs "y" $ TmVar 1 3)
+      it "shift 1 (\\ x x)" $
+        shift 1 ("x" +> "y" +> 1 <+ 2) `shouldBe`
+          ("x" +> "y" +> 1 <+ 3)
 
-      it "shift ((\\ y (\\ x y)) (\\ x x))" $ do
-        let f = TmAbs "y" $ TmAbs "x" $ TmVar 1 2
-        let g = TmAbs "x" $ TmVar 0 1
-        shift 1 (TmApp f g) `shouldBe`
-          TmApp (TmAbs "y" $ TmAbs "x" $ TmVar 1 3) (TmAbs "x" $ TmVar 0 2)
+      it "shift 1 ((\\ y (\\ x y)) (\\ x x))" $ do
+        let f = "y" +> "x" +> 1 <+ 2
+        let g = "x" +> 0 <+ 1
+        shift 1 (f <+> g) `shouldBe`
+          (("y" +> "x" +> 1 <+ 3) <+> ("x" +> 0 <+ 2))
 
-      it "shift (x)" $
-        shift 10 (TmVar 0 1) `shouldBe` TmVar 0 11
+      it "shuft 1 \\.1" $
+        shift 1 (1 <+ 2) `shouldBe` (2 <+ 3)
 
-      it "shuft \\.1" $
-        shift 1 (TmVar 1 1) `shouldBe` TmVar 2 2
+      it "shift 2 \\.2" $
+        shift 1 ("x" +> "y" +> "z" +> 2 <+ 3) `shouldBe`
+          ("x" +> "y" +> "z" +> 2 <+ 4)
+
+      it "shift 10 \\.0" $
+        shift 10 (0 <+ 1) `shouldBe` (10 <+ 11)
 
     describe "substitute varibales" $ do
 

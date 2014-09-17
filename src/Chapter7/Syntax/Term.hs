@@ -35,7 +35,7 @@ shift d = walk 0
     TmAbs x t   -> x +> walk (c + 1) t
     TmApp t1 t2 -> walk c t1 <+> walk c t2
     TmVar i l
-      | i >= l    -> i + d <+ l + d
+      | i >= c    -> i + d <+ l + d
       | otherwise -> i <+ l + d
 
 (-^) :: Int -> Term -> Term
