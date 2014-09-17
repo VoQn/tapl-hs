@@ -14,6 +14,6 @@ import Chapter7.Eval
 process :: String -> IO ()
 process line = case parseExpr line of
   Left  err  -> print err
-  Right expr -> case eval [] expr of
+  Right expr -> case eval expr of
     Left  err  -> display err
     Right term -> display (withContext [] term)
