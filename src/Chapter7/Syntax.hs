@@ -28,13 +28,13 @@ indexToName :: Context -> Int -> Int -> Either RuntimeException Name
 indexToName c i l
   | length c /= l = Left $ WrongContextDepth i l $ length c
   | length c <= i = Left $ OutOfContextIndex i
-  | otherwise     = Right $ fst $ c !! i
+  | otherwise     = Right $ c !! i
 
 nameToIndex :: Context -> Name -> Either RuntimeException Int
 nameToIndex [] n     = Left $ UnboundIdentifier n
 nameToIndex (y:ys) n
-  | fst y == n       = Right 0
-  | otherwise        = (1 +) <$> nameToIndex ys n
+  | y == n    = Right 0
+  | otherwise = (1 +) <$> nameToIndex ys n
 
 -------------------------------------------------------------------------------
 -- Display Term & Exception

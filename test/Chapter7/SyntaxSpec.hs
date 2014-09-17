@@ -14,25 +14,25 @@ spec = do
     describe "find variable from context" $ do
 
       it "(\\ x x) , x -> 0" $ do
-        let ctx = [("x", NameBind)]
+        let ctx = ["x"]
         nameToIndex ctx "x" `shouldBe` Right 0
 
       it "(\\ x (\\ y x)) , x -> 1" $ do
-        let ctx = [("y",NameBind), ("x", NameBind)]
+        let ctx = ["y", "x"]
         nameToIndex ctx "x" `shouldBe` Right 1
 
       it "(\\ x (\\ y x)) , z -> <Error>" $ do
-        let ctx = [("y",NameBind), ("x", NameBind)]
+        let ctx = ["y", "x"]
         nameToIndex ctx "z" `shouldBe` Left (UnboundIdentifier "z")
 
     describe "find variable name from index" $ do
 
       it "can find exist variable from context" $ do
-        let ctx = [("x",NameBind)]
+        let ctx = ["x"]
         indexToName ctx 0 1 `shouldBe` Right "x"
 
       it "cannot find variable by out-of-context index" $ do
-        let ctx = [("x",NameBind)]
+        let ctx = ["x"]
         indexToName ctx 0 2 `shouldBe` Left (WrongContextDepth 0 2 1)
 
       it "cannot find from empty context" $ do
