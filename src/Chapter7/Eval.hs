@@ -1,4 +1,4 @@
-{-# LANGUAGE LambdaCase, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Chapter7.Eval where
 
 import Control.Applicative
@@ -11,38 +11,43 @@ import Chapter7.Identifier
 import Chapter7.Syntax
 import Chapter7.BuiltinFuncs
 
-data Terminate = NoRuleApplies | UndefinedFunction Name
+data Terminate
+  = NoRuleApplies
+  | UndefinedFunction Name
   deriving (Eq, Show)
 
 instance Display Terminate where
-  toDisplay = \case
+  toDisplay t = case t of
     NoRuleApplies
       -> "[TERMINATE]"
-
-    UndefinedFunction f
-      -> "[ERROR] Undefined Function: " <> toDisplay f
+    UndefinedFunction n
+      -> "[ERROR] Undefined Function: " <> toDisplay n
 
 isVal :: Term -> Bool
-isVal (TmAbs _ _) = True
-isVal (TmFree  n) = case Map.lookup n builtinFuncs of
-  Just _  -> True
-  Nothing -> False
-isVal _           = False
+isVal t = case t of
+  TmAbs _ _
+    -> True
+  TmFree n
+    -> case Map.lookup n builtinFuncs of
+        Just _  -> True
+        Nothing -> False
+  _ -> False
 
 eval1 :: Term -> Either Terminate Term
-eval1 = \case
-  TmApp v1@(TmAbs _ t) v2
-    | isVal v2 -> Right $ substTop v2 t
-    | otherwise  -> TmApp v1 <$> eval1 v2
-  TmApp t1 t2 ->
-    TmApp <$> eval1 t1 <*> pure t2
-  TmFree n -> case Map.lookup n builtinFuncs of
-    Just f  -> Right f
-    Nothing -> Left $ UndefinedFunction n
-  _ ->
-    Left NoRuleApplies
+eval1 t = case t of
+  TmApp (TmAbs _ t') t2
+    -> Right $ substTop t2 t'
+  TmApp t1 t2
+    -> TmApp <$> eval1 t1 <*> pure t2
+  TmFree n
+    -> case Map.lookup n builtinFuncs of
+        Just fn -> Right fn
+        Nothing -> Left $ UndefinedFunction n
+  _ -> Left NoRuleApplies
 
 eval :: Term -> Either Terminate Term
 eval t = case eval1 t of
+  Left t'  -> case t' of
+    NoRuleApplies -> Right t
+    _             -> Left  t'
   Right t' -> eval t'
-  Left  _  -> Right t

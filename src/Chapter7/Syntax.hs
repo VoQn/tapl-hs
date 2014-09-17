@@ -17,16 +17,20 @@ data Term
   | TmApp Term Term
   deriving (Eq, Show)
 
+-------------------------------------------------------------------------------
+-- Alias for data constructor of `Term`
+-------------------------------------------------------------------------------
+
 (<+) :: Int -> Int -> Term
-i <+ l = TmVar i l
+(<+) = TmVar
 infix 4 <+
 
 (+>) :: Name -> Term -> Term
-n +> t = TmAbs n t
+(+>) = TmAbs
 infixr 2 +>
 
 (<+>) :: Term -> Term -> Term
-t1 <+> t2 = TmApp t1 t2
+(<+>) = TmApp
 infixl 3 <+>
 
 -------------------------------------------------------------------------------
@@ -39,14 +43,14 @@ shift d = walk 0
   walk :: Int -> Term -> Term
   walk c = \case
     v@(TmFree _) -> v
-    TmAbs x t   -> x +> walk (c + 1) t
-    TmApp t1 t2 -> walk c t1 <+> walk c t2
+    TmAbs x t    -> x +> walk (c + 1) t
+    TmApp t1 t2  -> walk c t1 <+> walk c t2
     TmVar i l
       | i >= c    -> i + d <+ l + d
       | otherwise -> i <+ l + d
 
 (-^) :: Int -> Term -> Term
-d -^ t = shift d t
+(-^) = shift
 infix 9 -^
 
 subst :: Int -> Term -> Term -> Term
@@ -55,15 +59,14 @@ subst j s = walk 0
   walk :: Int -> Term -> Term
   walk c = \case
     v@(TmFree _) -> v
-    TmAbs x t   -> x +> walk (c + 1) t
-    TmApp t1 t2 -> walk c t1 <+> walk c t2
+    TmAbs x t    -> x +> walk (c + 1) t
+    TmApp t1 t2  -> walk c t1 <+> walk c t2
     TmVar i l
       | i == j + c -> c -^ s
       | otherwise  -> i <+ l
 
 substTop :: Term -> Term -> Term
-substTop s =
-  ((-1) -^) . subst 0 (1 -^ s)
+substTop s = ((-1) -^) . subst 0 (1 -^ s)
 
 -------------------------------------------------------------------------------
 -- Context (Varibale's Name)
@@ -77,13 +80,13 @@ pickFreshName c n
 
 isNameBound :: Context -> Name -> Bool
 isNameBound c n = case c of
-  [] -> False
+  []             -> False
   (y:ys)
-    | y == n -> True
+    | y == n     -> True
     | otherwise  -> isNameBound ys n
 
 (+:+) :: Context -> [Name] -> Context
-(+:+) cx xs = case xs of
+(+:+) cx = \case
   []     -> cx
   (n:ns) -> (n:cx) +:+ ns
 
@@ -98,10 +101,11 @@ indexToName c i l
   | otherwise     = Right $ c !! i
 
 nameToIndex :: Context -> Name -> Either RuntimeException Int
-nameToIndex [] n     = Left $ UnboundIdentifier n
-nameToIndex (y:ys) n
-  | y == n    = Right 0
-  | otherwise = (1 +) <$> nameToIndex ys n
+nameToIndex c n = case c of
+  []            -> Left $ UnboundIdentifier n
+  (y:ys)
+    | y == n    -> Right 0
+    | otherwise -> (1 +) <$> nameToIndex ys n
 
 -------------------------------------------------------------------------------
 -- Display Term & Exception
@@ -110,17 +114,16 @@ instance Display Term where
   toDisplay = withContext []
 
 withContext :: Context -> Term -> LB.Builder
-
-withContext c (TmAbs n t) = let (c', n') = pickFreshName c n in
-  "(" <> spaceSep ["\\", toDisplay n', disp c' t] <> ")"
-
-withContext c (TmApp t1 t2) =
-  "(" <> spaceSep (map (disp c) [t1,t2]) <> ")"
-
-withContext c (TmVar i l) =
-  eitherDisplay $ indexToName c i l
-
-withContext _ (TmFree n) = toDisplay n
-
-disp :: Context -> Term -> LB.Builder
-disp c = toDisplay . withContext c
+withContext c = \case
+  TmApp t1 t2
+    -> "(" <> spaceSep (map (disp c) [t1,t2]) <> ")"
+  TmVar i l
+    -> eitherDisplay $ indexToName c i l
+  TmFree n
+    -> toDisplay n
+  TmAbs n t
+    -> let (c', n') = pickFreshName c n in
+       "(" <> spaceSep ["\\", toDisplay n', disp c' t] <> ")"
+  where
+  disp :: Context -> Term -> LB.Builder
+  disp ctx = toDisplay . withContext ctx
