@@ -42,35 +42,35 @@ spec = do
     describe "display own expression according to context" $ do
 
       it "id : (\\ x x)" $ do
-        let expr = TmAbs "x" $ TmVar 0 1
+        let term = "x" +> 0 <+ 1
         let ctx  = []
-        toDisplay (withContext ctx expr) `shouldBe`
+        toDisplay (withContext ctx term) `shouldBe`
           "(\\ x x)"
 
       it "seq : (\\ y (\\ x y))" $ do
-        let expr = TmAbs "y" $ TmAbs "x" $ TmVar 1 2
+        let term = "y" +> "x" +> 1 <+ 2
         let ctx  = []
-        toDisplay (withContext ctx expr) `shouldBe`
+        toDisplay (withContext ctx term) `shouldBe`
           "(\\ y (\\ x y))"
 
       it "tru : (\\ y (\\ x x))" $ do
-        let expr = TmAbs "y" $ TmAbs "x" $ TmVar 0 2
+        let term = "y" +> "x" +> 0 <+ 2
         let ctx  = []
-        toDisplay (withContext ctx expr) `shouldBe`
+        toDisplay (withContext ctx term) `shouldBe`
           "(\\ y (\\ x x))"
 
       it "fls : (\\ x (\\ x x))" $ do
-        let expr = TmAbs "x" $ TmAbs "x" $ TmVar 0 2
+        let term = "x" +> "x" +> 0 <+ 2
         let ctx  = []
-        toDisplay (withContext ctx expr) `shouldBe`
+        toDisplay (withContext ctx term) `shouldBe`
           "(\\ x (\\ x' x'))"
 
       it "apply : ((\\ x x) (\\ y y))" $ do
-        let idt1 = TmAbs "x" $ TmVar 0 1
-        let idt2 = TmAbs "y" $ TmVar 0 1
-        let expr = TmApp idt1 idt2
+        let idt1 = "x" +> 0 <+ 1
+        let idt2 = "y" +> 0 <+ 1
+        let term = idt1 <+> idt2
         let ctx  = []
-        toDisplay (withContext ctx expr) `shouldBe`
+        toDisplay (withContext ctx term) `shouldBe`
           "((\\ x x) (\\ y y))"
 
     describe "Error Handling" $ do
@@ -117,22 +117,22 @@ spec = do
     describe "substitute varibales" $ do
 
       it "subst (((\\ x x) (\\ x x)) (\\ y y))" $ do
-        let f = TmAbs "x" $ TmVar 0 1
-        let g = TmAbs "x" $ TmVar 0 1
-        let h = TmAbs "y" $ TmVar 0 1
-        subst 1 h (TmApp f g) `shouldBe` TmApp f g
+        let f = "x" +> 0 <+ 1
+        let g = "x" +> 0 <+ 1
+        let h = "y" +> 0 <+ 1
+        subst 1 h (f <+> g) `shouldBe` (f <+> g)
 
       it "subst 0 \\.0 \\.0" $
-        subst 0 (TmVar 0 1) (TmVar 0 1) `shouldBe` TmVar 0 1
+        subst 0 (0 <+ 1) (0 <+ 1) `shouldBe` (0 <+ 1)
 
       it "subst 1 \\.2(4) \\.1(5)" $
-        subst 1 (TmVar 2 4) (TmVar 1 5) `shouldBe` TmVar 2 4
+        subst 1 (2 <+ 4) (1 <+ 5) `shouldBe` (2 <+ 4)
 
     describe "substitute on Top Level" $ do
 
       it "substTop ((\\ x (\\ y x)) (\\ x x)) <-> (\\ z z)" $ do
-        let t = TmAbs "z" $ TmVar 0 1
-        let f = TmAbs "x" $ TmAbs "y" $ TmVar 1 2
-        let g = TmAbs "x" $ TmVar 0 1
+        let t = "z" +> 0 <+ 1
+        let f = "x" +> "y" +> 1 <+ 2
+        let g = "x" +> 0 <+ 1
 
-        substTop (TmApp f g) t `shouldBe` TmAbs "z" (TmVar 0 0)
+        substTop (f <+> g) t `shouldBe` ("z" +> 0 <+ 0)
