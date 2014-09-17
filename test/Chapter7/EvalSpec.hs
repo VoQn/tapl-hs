@@ -23,8 +23,8 @@ spec = do
     it "isVal (id) => isVal (\\ x x) => True" $
       isVal (TmFree "id") `shouldBe` True
 
-    it "isVal (undefinedFunc) => isVal #undefined => False" $
-      isVal (TmFree "undefinedFunc") `shouldBe` False
+    it "isVal (undefined-function) => isVal #undefined => False" $
+      isVal (TmFree "doodoo") `shouldBe` False
 
   describe "eval1" $ do
 
@@ -44,9 +44,16 @@ spec = do
       Right ("f" +> 1 -^ cId)
 
     it "eval1 (doodoo) => #undefined" $
-      eval1 (TmFree "doodoo") `shouldBe` Left (UndefinedFunction "doodoo")
+      eval1 (TmFree "doodoo") `shouldBe`
+        Left (UndefinedFunction "doodoo")
 
   describe "eval" $ do
+
+    describe "(undefined-function)" $ do
+
+      it "eval (doodoo) => ? => [UndefinedFunction Error]" $
+        eval (TmFree "doodoo") `shouldBe`
+          Left (UndefinedFunction "doodoo")
 
     describe "(id)" $ do
 
