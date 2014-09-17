@@ -22,6 +22,9 @@ instance Display LB.Builder where
 instance Display Int where
   toDisplay = LB.fromString . show
 
+instance Display Integer where
+  toDisplay = LB.fromString . show
+
 parens :: (Display a) => a -> LB.Builder
 parens d = "(" <> toDisplay d <> ")"
 
