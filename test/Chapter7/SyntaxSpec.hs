@@ -5,6 +5,7 @@ import Test.Hspec
 import Data.Monoid
 import Data.Display
 import Chapter7.Syntax
+import Chapter7.Exception
 
 spec :: Spec
 spec = do
@@ -41,36 +42,25 @@ spec = do
 
     describe "display own expression according to context" $ do
 
-      it "id : (\\ x x)" $ do
-        let term = "x" +> 0 <+ 1
-        let ctx  = []
-        toDisplay (withContext ctx term) `shouldBe`
-          "(\\ x x)"
+      it "id : (\\ x x)" $
+        toDisplay ("x" +> 0 <+ 1) `shouldBe` "(\\ x x)"
 
-      it "seq : (\\ y (\\ x y))" $ do
-        let term = "y" +> "x" +> 1 <+ 2
-        let ctx  = []
-        toDisplay (withContext ctx term) `shouldBe`
+      it "seq : (\\ y (\\ x y))" $
+        toDisplay ("y" +> "x" +> 1 <+ 2) `shouldBe`
           "(\\ y (\\ x y))"
 
-      it "tru : (\\ y (\\ x x))" $ do
-        let term = "y" +> "x" +> 0 <+ 2
-        let ctx  = []
-        toDisplay (withContext ctx term) `shouldBe`
+      it "tru : (\\ y (\\ x x))" $
+        toDisplay ("y" +> "x" +> 0 <+ 2) `shouldBe`
           "(\\ y (\\ x x))"
 
-      it "fls : (\\ x (\\ x x))" $ do
-        let term = "x" +> "x" +> 0 <+ 2
-        let ctx  = []
-        toDisplay (withContext ctx term) `shouldBe`
+      it "fls : (\\ x (\\ x x))" $
+        toDisplay ("x" +> "x" +> 0 <+ 2) `shouldBe`
           "(\\ x (\\ x' x'))"
 
       it "apply : ((\\ x x) (\\ y y))" $ do
         let idt1 = "x" +> 0 <+ 1
         let idt2 = "y" +> 0 <+ 1
-        let term = idt1 <+> idt2
-        let ctx  = []
-        toDisplay (withContext ctx term) `shouldBe`
+        toDisplay (idt1 <+> idt2) `shouldBe`
           "((\\ x x) (\\ y y))"
 
     describe "Error Handling" $ do

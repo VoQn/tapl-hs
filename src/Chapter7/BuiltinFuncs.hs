@@ -1,8 +1,10 @@
-module Chapter7.Syntax.BuiltinFuncs where
+module Chapter7.BuiltinFuncs where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Chapter7.Syntax.Term
+
+import Chapter7.Identifier
+import Chapter7.Syntax
 
 builtinFuncs :: Map Name Term
 builtinFuncs = Map.fromList $

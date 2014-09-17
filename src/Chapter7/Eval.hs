@@ -6,7 +6,10 @@ import Data.Map as Map
 import Data.Monoid ((<>))
 
 import Data.Display
+
+import Chapter7.Identifier
 import Chapter7.Syntax
+import Chapter7.BuiltinFuncs
 
 data Terminate = NoRuleApplies | UndefinedFunction Name
   deriving (Eq, Show)

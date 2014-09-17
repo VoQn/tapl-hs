@@ -1,10 +1,11 @@
 {-# LANGUAGE LambdaCase, OverloadedStrings #-}
-module Chapter7.Syntax.Exception where
+module Chapter7.Exception where
 
 import qualified Data.Text.Lazy.Builder as LB
 import Data.Monoid
 import Data.Display
-import Chapter7.Syntax.Term
+
+import Chapter7.Identifier
 
 data RuntimeException
   = WrongContextDepth Int Int Int

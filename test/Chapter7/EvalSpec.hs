@@ -6,6 +6,7 @@ import Test.Hspec.QuickCheck
 
 import Data.Display
 import Chapter7.Syntax
+import Chapter7.BuiltinFuncs
 import Chapter7.Eval
 
 spec :: Spec
@@ -193,7 +194,7 @@ spec = do
 
       prop "(UndefinedFunction \"anything\")" $ \n ->
         show (UndefinedFunction n) `shouldBe`
-          ("UndefinedFunction " ++ show n) 
+          ("UndefinedFunction " ++ show n)
 
     it "can display own when no-rule-applies pattern found" $
       toDisplay NoRuleApplies `shouldBe` "[TERMINATE]"
