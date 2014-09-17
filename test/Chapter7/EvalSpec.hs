@@ -2,6 +2,7 @@
 module Chapter7.EvalSpec where
 
 import Test.Hspec
+import Test.Hspec.QuickCheck
 
 import Data.Display
 import Chapter7.Syntax
@@ -166,6 +167,33 @@ spec = do
         eval term `shouldBe` Right cFls
 
   describe "Terminate" $ do
+
+    describe "equality" $ do
+
+      it "NoRuleApplies == NoRuleApplies" $
+        NoRuleApplies == NoRuleApplies `shouldBe` True
+
+      prop "UndefinedFunction f == UndefinedFunction g => f == g" $ \f g ->
+        UndefinedFunction f == UndefinedFunction g `shouldBe` f == g
+
+      prop "NoRuleApplies /= UndefinedFunction any" $ \n ->
+        NoRuleApplies /= UndefinedFunction n `shouldBe` True
+
+      prop "UndefinedFunction any /= NoRuleApplies" $ \n ->
+        UndefinedFunction n /= NoRuleApplies `shouldBe` True
+
+    describe "show" $ do
+
+      it "NoRuleApplies show own" $
+        show NoRuleApplies `shouldBe` "NoRuleApplies"
+
+      it "(UndefinedFunction f) show own" $
+        show (UndefinedFunction "doodoo") `shouldBe`
+          "UndefinedFunction \"doodoo\""
+
+      prop "(UndefinedFunction \"anything\")" $ \n ->
+        show (UndefinedFunction n) `shouldBe`
+          ("UndefinedFunction " ++ show n) 
 
     it "can display own when no-rule-applies pattern found" $
       toDisplay NoRuleApplies `shouldBe` "[TERMINATE]"
