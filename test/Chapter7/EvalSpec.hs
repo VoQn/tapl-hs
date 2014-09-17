@@ -41,6 +41,9 @@ spec = do
       eval1 (cTru <+> cId) `shouldBe`
       Right ("f" +> 1 -^ cId)
 
+    it "eval1 (doodoo) => #undefined" $
+      eval1 (TmFree "doodoo") `shouldBe` Left (UndefinedFunction "doodoo")
+
   describe "eval" $ do
 
     describe "(id)" $ do
@@ -164,5 +167,9 @@ spec = do
 
   describe "Terminate" $ do
 
-    it "can display own expression" $ do
+    it "can display own when no-rule-applies pattern found" $
       toDisplay NoRuleApplies `shouldBe` "[TERMINATE]"
+
+    it "can display own when undefined function found" $
+      toDisplay (UndefinedFunction "undefined") `shouldBe`
+        "[ERROR] Undefined Function: undefined"
