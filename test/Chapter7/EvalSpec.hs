@@ -2,9 +2,11 @@
 module Chapter7.EvalSpec where
 
 import Test.Hspec
+import Test.Hspec.QuickCheck
 
 import Data.Display
 import Chapter7.Syntax
+import Chapter7.BuiltinFuncs
 import Chapter7.Eval
 
 spec :: Spec
@@ -13,137 +15,190 @@ spec = do
   describe "isVal" $ do
 
     it "isVal (\\ x x) => True" $
-      isVal [] (cIdn "x") `shouldBe` True
+      isVal (cIdn "x") `shouldBe` True
 
     it "isVal \\.0 => False" $
-      isVal [] (0 <+ 1) `shouldBe` False
+      isVal (0 <+ 1) `shouldBe` False
+
+    it "isVal (id) => isVal (\\ x x) => True" $
+      isVal (TmFree "id") `shouldBe` True
+
+    it "isVal (undefinedFunc) => isVal #undefined => False" $
+      isVal (TmFree "undefinedFunc") `shouldBe` False
 
   describe "eval1" $ do
 
     it "eval1 id => NoRuleApplies" $
-      eval1 [] (cIdn "x") `shouldBe` Left NoRuleApplies
+      eval1 cId `shouldBe` Left NoRuleApplies
 
     it "eval1 (id id) => id" $
-      eval1 [] (TmApp (cIdn "x") $ cIdn "x") `shouldBe`
-      Right (cIdn "x")
+      eval1 (cId <+> cId) `shouldBe`
+      Right cId
 
     it "eval1 (fls $ \\ x x) => (\\ f f)" $
-      eval1 [] (cFls <+> cIdn "x") `shouldBe`
+      eval1 (cFls <+> cId) `shouldBe`
       Right (cIdn "f")
 
     it "eval1 (tru $ \\ x x) => (\\ f $ \\ x x)" $
-      eval1 [] (cTru <+> cIdn "x") `shouldBe`
+      eval1 (cTru <+> cId) `shouldBe`
       Right ("f" +> 1 -^ cId)
+
+    it "eval1 (doodoo) => #undefined" $
+      eval1 (TmFree "doodoo") `shouldBe` Left (UndefinedFunction "doodoo")
 
   describe "eval" $ do
 
-    it "eval (id (id (id (id (\\ x x))))) => (\\ x x)" $ do
-      let expr = cIdn "a" <+> cIdn "b" <+> cIdn "c" <+> cIdn "d" <+> cIdn "x"
-      eval [] expr `shouldBe` Right (cIdn "x")
+    describe "(id)" $ do
+
+      it "eval (id) => id" $
+        eval (TmFree "id") `shouldBe` Right cId
+
+      it "eval (id (id (id (id (\\ x x))))) => (\\ x x)" $ do
+        let term = cIdn "a" <+> cIdn "b" <+> cIdn "c" <+> cIdn "d" <+> cIdn "x"
+        eval term `shouldBe` Right (cIdn "x")
 
     describe "tru/fls" $ do
+
+      it "eval (tru) => tru" $
+        eval (TmFree "tru") `shouldBe` Right cTru
+
+      it "eval (fls) => fls" $
+        eval (TmFree "fls") `shouldBe` Right cFls
+
       it "eval (tru A B) => A" $ do
-        let expr = cTru <+> cIdn "a" <+> cIdn "b"
-        eval [] expr `shouldBe` Right (cIdn "a")
+        let term = cTru <+> cIdn "a" <+> cIdn "b"
+        eval term `shouldBe` Right (cIdn "a")
 
       it "eval (fls A B) => B" $ do
-        let expr = cFls <+> cIdn "a" <+> cIdn "b"
-        eval [] expr `shouldBe` Right (cIdn "b")
+        let term = cFls <+> cIdn "a" <+> cIdn "b"
+        eval term `shouldBe` Right (cIdn "b")
 
-    describe "(test)" $ do
-      it "eval (test) => test" $ do
-        eval [] cTst `shouldBe` Right cTst
+    describe "(tst)" $ do
+      it "eval (tst) => test" $ do
+        eval (TmFree "tst") `shouldBe` Right cTst
 
-      it "eval (test tru v w) => v" $ do
-        let expr = cTst <+> cTru <+> cIdn "v" <+> cIdn "w"
-        eval [] expr `shouldBe` Right (cIdn "v")
+      it "eval (tst tru v w) => v" $ do
+        let term = cTst <+> cTru <+> cIdn "v" <+> cIdn "w"
+        eval term `shouldBe` Right (cIdn "v")
 
-      it "eval (test fls v w) => w" $ do
-        let expr = cTst <+> cFls <+> cIdn "v" <+> cIdn "w"
-        eval [] expr `shouldBe` Right (cIdn "w")
+      it "eval (tst fls v w) => w" $ do
+        let term = cTst <+> cFls <+> cIdn "v" <+> cIdn "w"
+        eval term `shouldBe` Right (cIdn "w")
 
     describe "(and)" $ do
 
       it "eval (and) => and" $
-        eval [] cAnd `shouldBe` Right cAnd
+        eval (TmFree "and") `shouldBe` Right cAnd
 
       it "eval (and tru tru) => tru" $ do
         let expr = cAnd <+> cTru <+> cTru
-        eval [] expr `shouldBe` Right cTru
+        eval expr `shouldBe` Right cTru
 
       it "eval (and fls tru) => fls" $ do
         let expr = cAnd <+> cFls <+> cTru
-        eval [] expr `shouldBe` Right cFls
+        eval expr `shouldBe` Right cFls
 
       it "eval (and tru fls) => fls" $ do
         let expr = cAnd <+> cTru <+> cFls
-        eval [] expr `shouldBe` Right cFls
+        eval expr `shouldBe` Right cFls
 
       it "eval (and fls fls) => fls" $ do
         let expr = cAnd <+> cFls <+> cFls
-        eval [] expr `shouldBe` Right cFls
+        eval expr `shouldBe` Right cFls
 
     describe "(or)" $ do
 
       it "eval (or) => or" $ do
-        eval [] cOr `shouldBe` Right cOr
+        eval (TmFree "or") `shouldBe` Right cOr
 
       it "eval (or tru tru) => tru" $ do
         let expr = cOr <+> cTru <+> cTru
-        eval [] expr `shouldBe` Right cTru
+        eval expr `shouldBe` Right cTru
 
       it "eval (or fls tru) => tru" $ do
         let expr = cOr <+> cFls <+> cTru
-        eval [] expr `shouldBe` Right cTru
+        eval expr `shouldBe` Right cTru
 
       it "eval (or tru fls) => tru" $ do
         let expr = cOr <+> cTru <+> cFls
-        eval [] expr `shouldBe` Right cTru
+        eval expr `shouldBe` Right cTru
 
       it "eval (or fls fls) => fls" $ do
         let expr = cOr <+> cFls <+> cFls
-        eval [] expr `shouldBe` Right cFls
+        eval expr `shouldBe` Right cFls
 
-    describe "(pair)/(fst)/(snd)" $ do
+    describe "(pir)/(fst)/(snd)" $ do
 
-      it "eval (pair) => pair" $
-        eval [] cPir `shouldBe` Right cPir
+      it "eval (pir) => pair" $
+        eval (TmFree "pir") `shouldBe` Right cPir
 
       it "eval (fst) => fst" $
-        eval [] cFst `shouldBe` Right cFst
+        eval (TmFree "fst") `shouldBe` Right cFst
 
       it "eval (snd) => snd" $
-        eval [] cSnd `shouldBe` Right cSnd
+        eval (TmFree "snd") `shouldBe` Right cSnd
 
-      it "eval (fst (pair (\\ v v) (\\ w w))) => (\\ v v)" $
-        eval [] (cFst <+> (cPir <+> cIdn "v" <+> cIdn "w")) `shouldBe`
-        Right (cIdn "v")
+      it "eval (fst (pir (\\ v v) (\\ w w))) => (\\ v v)" $ do
+        let term = cFst <+> (cPir <+> cIdn "v" <+> cIdn "w")
+        eval term `shouldBe` Right (cIdn "v")
 
-      it "eval (snd (pair (\\ v v) (\\ w w))) => (\\ w w)" $
-        eval [] (cSnd <+> (cPir <+> cIdn "v" <+> cIdn "w")) `shouldBe`
-        Right (cIdn "w")
+      it "eval (snd (pir (\\ v v) (\\ w w))) => (\\ w w)" $ do
+        let term = cSnd <+> (cPir <+> cIdn "v" <+> cIdn "w")
+        eval term `shouldBe` Right (cIdn "w")
 
-    describe "(zero)/(one)/(succ)/(zero?)" $ do
+    describe "(zro)/(one)/(scc)/(zro?)" $ do
 
-      it "eval (zero) => zero" $
-        eval [] cZro `shouldBe` Right cZro
+      it "eval (zro) => zero" $
+        eval (TmFree "zro") `shouldBe` Right cZro
 
-      it "eval (one) => zero" $
-        eval [] cOne `shouldBe` Right cOne
+      it "eval (one) => one" $
+        eval (TmFree "one") `shouldBe` Right cOne
 
-      it "eval (succ) => succ" $
-        eval [] cScc `shouldBe` Right cScc
+      it "eval (scc) => succ" $
+        eval (TmFree "scc") `shouldBe` Right cScc
 
       it "eval (zero?) => zero?" $
-        eval [] cIsZro `shouldBe` Right cIsZro
+        eval (TmFree "zro?") `shouldBe` Right cIsZro
 
       it "eval (zero? zero) => tru" $
-        eval [] (cIsZro <+> cZro) `shouldBe` Right cTru
+        eval (cIsZro <+> cZro) `shouldBe` Right cTru
 
-      it "eval (zero? (succ zero)) => fls" $
-        eval [] (cIsZro <+> (cScc <+> cZro)) `shouldBe` Right cFls
+      it "eval (zero? (succ zero)) => fls" $ do
+        let term = cIsZro <+> (cScc <+> cZro)
+        eval term `shouldBe` Right cFls
 
   describe "Terminate" $ do
 
-    it "can display own expression" $ do
+    describe "equality" $ do
+
+      it "NoRuleApplies == NoRuleApplies" $
+        NoRuleApplies == NoRuleApplies `shouldBe` True
+
+      prop "UndefinedFunction f == UndefinedFunction g => f == g" $ \f g ->
+        UndefinedFunction f == UndefinedFunction g `shouldBe` f == g
+
+      prop "NoRuleApplies /= UndefinedFunction any" $ \n ->
+        NoRuleApplies /= UndefinedFunction n `shouldBe` True
+
+      prop "UndefinedFunction any /= NoRuleApplies" $ \n ->
+        UndefinedFunction n /= NoRuleApplies `shouldBe` True
+
+    describe "show" $ do
+
+      it "NoRuleApplies show own" $
+        show NoRuleApplies `shouldBe` "NoRuleApplies"
+
+      it "(UndefinedFunction f) show own" $
+        show (UndefinedFunction "doodoo") `shouldBe`
+          "UndefinedFunction \"doodoo\""
+
+      prop "(UndefinedFunction \"anything\")" $ \n ->
+        show (UndefinedFunction n) `shouldBe`
+          ("UndefinedFunction " ++ show n)
+
+    it "can display own when no-rule-applies pattern found" $
       toDisplay NoRuleApplies `shouldBe` "[TERMINATE]"
+
+    it "can display own when undefined function found" $
+      toDisplay (UndefinedFunction "undefined") `shouldBe`
+        "[ERROR] Undefined Function: undefined"

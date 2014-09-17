@@ -23,19 +23,19 @@ spec = do
   describe "Nameless, variable parsers" $ do
 
     it "[x, y, z] x" $ do
-      let ctx = [("x", NameBind), ("y", NameBind), ("z", NameBind)]
+      let ctx = ["x", "y", "z"]
       parseVar ctx "z" `shouldBe` Right (2 <+ 3)
 
     it "[z, y, z] (x y)" $ do
-      let ctx = [("z", NameBind), ("y", NameBind), ("x", NameBind)]
+      let ctx = ["z", "y", "x"]
       parseApp ctx "(x y)" `shouldBe` Right ((2 <+ 3) <+> (1 <+ 3))
 
     it "[y, x] (v)" $ do
-      let ctx = [("y",NameBind),("x",NameBind)]
+      let ctx = ["y", "x"]
       parseVar ctx "v" `shouldBe` Right (TmFree "v")
 
     it "[z, y, x] (w x y z)" $ do
-      let ctx = [("z", NameBind), ("y", NameBind), ("x", NameBind)]
+      let ctx = ["z", "y", "x"]
       parseApp ctx "(w x y z)" `shouldBe`
         Right (TmFree "w" <+> (2 <+ 3) <+> (1 <+ 3) <+> (0 <+ 3))
 

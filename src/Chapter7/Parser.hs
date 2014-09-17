@@ -4,6 +4,7 @@ import Control.Applicative hiding ((<|>), many)
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
+import Chapter7.Identifier
 import Chapter7.Syntax
 
 whitespace :: Parser a -> Parser a
