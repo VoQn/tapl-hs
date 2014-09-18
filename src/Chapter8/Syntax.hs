@@ -3,12 +3,8 @@ module Chapter8.Syntax where
 
 import Data.Display
 
+import Chapter8.Type
 import Chapter8.NumVal
-
-data Ty
-  = TyBool
-  | TyNat
-  deriving (Eq, Show)
 
 data Term
   = TmTrue
@@ -26,13 +22,14 @@ data Val
   | ValNum NumVal
   deriving (Eq, Show)
 
-instance Display Ty where
-  toDisplay ty = case ty of
-    TyBool -> "Bool"
-    TyNat  -> "Nat"
-
 instance Display Val where
   toDisplay v = case v of
     ValTrue   -> "true"
     ValFalse  -> "false"
     ValNum nv -> toDisplay nv
+
+instance HasType Val where
+  typeof v = case v of
+    ValTrue  -> Right TyBool
+    ValFalse -> Right TyBool
+    ValNum _ -> Right TyNat

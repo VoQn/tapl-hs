@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Chapter8.TySpec where
+module Chapter8.TypeSpec where
 
 import Test.Hspec
 import Test.Hspec.QuickCheck
@@ -47,3 +47,8 @@ spec = do
 
       it "display TyNat" $
         toDisplay TyNat  `shouldBe` "Nat"
+
+    describe "as an instance of HasType type-class" $ do
+
+      it "typeof TyBool => TyBool" $ typeof TyBool `shouldBe` Right TyBool
+      it "typeof TyNat  => TyNat"  $ typeof TyNat  `shouldBe` Right TyNat

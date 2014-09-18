@@ -46,3 +46,14 @@ spec = do
 
       it "display (ValNum $ NumSucc NumZero)" $
         toDisplay (ValNum $ NumSucc NumZero) `shouldBe` "1"
+
+    describe "as an instance of HasType type-class" $ do
+
+      it "typeof ValTrue => Bool" $
+        typeof ValTrue `shouldBe` Right TyBool
+
+      it "typeof ValFalse => Bool" $
+        typeof ValFalse `shouldBe` Right TyBool
+
+      it "typeof (ValNum NumZero) => Nat" $
+        typeof (ValNum NumZero) `shouldBe` Right TyNat
