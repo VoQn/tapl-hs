@@ -23,6 +23,10 @@ spec = do
     it "100 -> \"100\"" $
       toDisplay (100 :: Int) `shouldBe` "100"
 
+  describe "Int is instance of Display type-class" $ do
+    it "100 -> \"100\"" $
+      toDisplay (100 :: Integer) `shouldBe` "100"
+
   describe "Text Build Combinator" $ do
     it "spaceSep []" $
       spaceSep ([] :: [String]) `shouldBe` ""
