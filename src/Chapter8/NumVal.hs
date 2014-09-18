@@ -3,6 +3,8 @@ module Chapter8.NumVal where
 import Data.Monoid
 import Data.Display
 
+import Chapter8.Type
+
 data NumVal
   = NumZero
   | NumSucc NumVal
@@ -41,3 +43,6 @@ instance Monoid NumVal where
 
 instance Display NumVal where
   toDisplay = toDisplay . fromEnum
+
+instance HasType NumVal where
+  typeof _ = Right TyNat

@@ -124,3 +124,8 @@ spec = do
 
       it "display (NumSucc $ NumSucc $ NumSucc NumZero) -> \"3\"" $
         toDisplay (NumSucc $ NumSucc $ NumSucc NumZero) `shouldBe` "3"
+
+    describe "as an instance of HasType type-class" $
+
+      prop "typeof (anyValue :: NumVal) => TyNat" $ \(anyValue :: NumVal) ->
+        typeof anyValue `shouldBe` Right TyNat
