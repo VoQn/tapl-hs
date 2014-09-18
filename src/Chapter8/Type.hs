@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Chapter8.Type where
 
+import Data.Monoid
 import Data.Display
 
 data Ty
@@ -9,7 +10,8 @@ data Ty
   deriving (Eq, Show)
 
 data TypeError
-  = TypeError String
+  = MismatchWithRequire Ty Ty
+  | MultiTypeReturn [(String, Ty)]
   deriving (Eq, Show)
 
 class HasType a where
@@ -22,3 +24,14 @@ instance Display Ty where
 
 instance HasType Ty where
   typeof = Right
+
+instance Display TypeError where
+  toDisplay err = case err of
+    MismatchWithRequire r b
+      -> let (r', b') = (toDisplay r, toDisplay b) in
+         "Required " <> r' <> " value, but applied value has " <> b'
+
+    MultiTypeReturn cases
+      -> "Multiple Type Return [" <> conc cases <> "]"
+    where
+    conc = sep ", " . map (\(a,b) -> toDisplay a <> ": " <> toDisplay b)
