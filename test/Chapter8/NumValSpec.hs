@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Chapter8.NumValSpec where
 
+import Data.Monoid
 import Control.Applicative
 import Test.Hspec
 import Test.Hspec.QuickCheck
@@ -39,6 +40,58 @@ spec = do
       prop "A /= B ==> B /= A" $ \((a, b) :: (NumVal, NumVal)) ->
         a /= b `shouldBe` b /= a
 
+    describe "as an instance of Ord type-class" $ do
+
+      it "NumZero < (NumSucc NumZero)" $
+        NumZero < (NumSucc NumZero) `shouldBe` True
+
+      it "(NumSucc $ NumSucc NumZero) > (NumSucc NumZero)" $
+        (NumSucc $ NumSucc NumZero) > (NumSucc NumZero) `shouldBe` True
+
+    describe "as an instance of Enum type-class" $ do
+
+      it "toEnum 0 => NumZero" $
+        (toEnum 0 :: NumVal) `shouldBe` NumZero
+
+      it "toEnum 1 => (NumSucc NumZero)" $
+        (toEnum 1 :: NumVal) `shouldBe` (NumSucc NumZero)
+
+      it "fromEnum NumZero => 0" $
+        fromEnum NumZero `shouldBe` 0
+
+      it "fromEnum (NumSucc NumZero) => 1" $
+        fromEnum (NumSucc NumZero) `shouldBe` 1
+
+      it "fromEnum (NumSucc $ NumSucc NumZero) => 2" $
+        fromEnum (NumSucc $ NumSucc NumZero) `shouldBe` 2
+
+      it "succ NumZero => (NumSucc NumZero)" $
+        succ NumZero `shouldBe` (NumSucc NumZero)
+
+      it "pred NumZero => NumZero" $
+        pred NumZero `shouldBe` NumZero
+
+      it "pred (NumSucc NumZero) => NumZero" $
+        pred (NumSucc NumZero) `shouldBe` NumZero
+
+    describe "as an instance of Monoid type-class" $ do
+
+      it "mempty => NumZero" $
+        (mempty :: NumVal) `shouldBe` NumZero
+
+      it "NumZero <> NumZero => NumZero" $
+        (NumZero <> NumZero) `shouldBe` NumZero
+
+      it "NumZero <> (NumSucc NumZero) => (NumSucc NumZero)" $
+        (NumZero <> NumSucc NumZero) `shouldBe` (NumSucc NumZero)
+
+      it "(NumSucc NumZero) <> NumZero => (NumSucc NumZero)" $
+        (NumSucc NumZero <> NumZero) `shouldBe` (NumSucc NumZero)
+
+      it "(NumSucc NumZero) <> (NumSucc NumZero) => (NumSucc $ NumSucc NumZero)" $
+        (NumSucc NumZero <> NumSucc NumZero) `shouldBe`
+          (NumSucc $ NumSucc NumZero)
+
     describe "as an instance of Show type-class" $ do
 
       prop "show" $ \(nv :: NumVal) ->
@@ -47,16 +100,16 @@ spec = do
     describe "can convert real integer" $ do
 
       it "NumZero -> 0" $
-        realNum NumZero `shouldBe` 0
+        toRealNum NumZero `shouldBe` 0
 
       it "(NumSucc NumZero) -> 1" $
-        realNum (NumSucc NumZero) `shouldBe` 1
+        toRealNum (NumSucc NumZero) `shouldBe` 1
 
       it "(NumSucc $ NumSucc NumZero) -> 2" $
-        realNum (NumSucc $ NumSucc NumZero) `shouldBe` 2
+        toRealNum (NumSucc $ NumSucc NumZero) `shouldBe` 2
 
       it "(NumSucc $ NumSucc $ NumSucc NumZero) -> 3" $
-        realNum (NumSucc $ NumSucc $ NumSucc NumZero) `shouldBe` 3
+        toRealNum (NumSucc $ NumSucc $ NumSucc NumZero) `shouldBe` 3
 
     describe "as an instance of Display type-class" $ do
 
