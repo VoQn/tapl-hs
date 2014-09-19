@@ -40,7 +40,8 @@ library
                     Chapter8,
                     Chapter8.Type,
                     Chapter8.NumVal,
-                    Chapter8.Syntax
+                    Chapter8.Syntax,
+                    Chapter8.Lexer
 
 executable tapl-hs
   main-is:          Main.hs
