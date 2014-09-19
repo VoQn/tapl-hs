@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, OverloadedStrings #-}
-module Data.Display (Display(..), parens, spaceSep) where
+module Data.Display (Display(..), parens, sep, spaceSep) where
 
 import qualified Data.Text.Lazy.Builder as LB
 import qualified Data.Text.Lazy.IO as LIO
@@ -20,6 +20,9 @@ instance Display LB.Builder where
   toDisplay = id
 
 instance Display Int where
+  toDisplay = LB.fromString . show
+
+instance Display Integer where
   toDisplay = LB.fromString . show
 
 parens :: (Display a) => a -> LB.Builder
