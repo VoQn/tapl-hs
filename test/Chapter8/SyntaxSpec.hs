@@ -96,3 +96,30 @@ spec = do
         \(e :: WrongTerm) -> do
           typeof (TmIf TmTrue TmTrue (unWrong e)) `shouldBe`
             Left (MismatchWithRequire TyNat TyBool)
+
+    describe "as an instance of Display type-class" $ do
+
+      it "toDisplay TmTrue => \"true\"" $
+        toDisplay TmTrue `shouldBe` "true"
+
+      it "toDisplay TmFalse => \"false\"" $
+        toDisplay TmFalse `shouldBe` "false"
+
+      it "toDisplay TmZero => \"0\"" $
+        toDisplay TmZero `shouldBe` "0"
+
+      it "toDisplay (TmIsZero TmZero) => \"(zero? 0)\"" $
+        toDisplay (TmIsZero TmZero) `shouldBe` "(zero? 0)"
+
+      it "toDisplay (TmSucc TmZero) => \"1\"" $
+        toDisplay (TmSucc TmZero) `shouldBe` "1"
+
+      it "toDisplay (TmSucc $ TmSucc TmZero) => \"2\"" $
+        toDisplay (TmSucc $ TmSucc TmZero) `shouldBe` "2"
+
+      it "toDisplay (TmSucc $ TmPred TmZero) => \"(succ (pred 0))\"" $
+        toDisplay (TmSucc $ TmPred TmZero) `shouldBe` "(succ (pred 0))"
+
+      it "toDisplay (TmIf TmTrue TmZero (TmSucc TmZero)) => \"(if true 0 1)\"" $
+        toDisplay (TmIf TmTrue TmZero (TmSucc TmZero)) `shouldBe`
+          "(if true 0 1)"

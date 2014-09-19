@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase, OverloadedStrings #-}
 module Chapter8.Syntax where
 
 import Data.Display
@@ -23,23 +23,23 @@ data Val
   deriving (Eq, Show)
 
 instance Display Val where
-  toDisplay v = case v of
-    ValTrue   -> "true"
-    ValFalse  -> "false"
-    ValNum nv -> toDisplay nv
+  toDisplay = \case
+    ValTrue  -> "true"
+    ValFalse -> "false"
+    ValNum v -> toDisplay v
 
 instance HasType Val where
-  typeof v = case v of
+  typeof = \case
     ValTrue  -> Right TyBool
     ValFalse -> Right TyBool
     ValNum _ -> Right TyNat
 
 requireType :: Ty -> Ty -> Term -> Either TypeError Ty
 requireType req ret term = case typeof term of
+  Left  err -> Left err
   Right ty
     | ty == req -> Right ret
     | otherwise -> Left $ MismatchWithRequire req ty
-  Left  err     -> Left err
 
 requireSameType :: (String, Term) -> (String, Term) -> Either TypeError Ty
 requireSameType (lt,tt) (lf,tf) = case (typeof tt, typeof tf) of
@@ -49,17 +49,35 @@ requireSameType (lt,tt) (lf,tf) = case (typeof tt, typeof tf) of
     | t == f    -> Right t
     | otherwise -> Left $ MultiTypeReturn [(lt, t), (lf, f)]
 
+instance Display Term where
+  toDisplay = \case
+    TmTrue  -> "true"
+    TmFalse -> "false"
+    TmZero  -> "0"
+
+    TmSucc   t -> dispSucc 1 t
+    TmPred   t -> dispApp "pred"  [t]
+    TmIsZero t -> dispApp "zero?" [t]
+
+    TmIf p t f -> dispApp "if"    [p,t,f]
+    where
+    dispApp  f = parens . spaceSep . (f :) . map toDisplay
+    dispSucc n = \case
+      TmZero   -> toDisplay $ n `max` (0 :: Integer)
+      TmSucc t -> dispSucc (n + 1) t
+      others   -> dispApp "succ" [others]
+
 instance HasType Term where
-  typeof term = case term of
+  typeof = \case
     TmTrue  -> Right TyBool
     TmFalse -> Right TyBool
     TmZero  -> Right TyNat
 
-    TmIsZero t -> requireType TyNat TyBool t
     TmSucc   t -> requireType TyNat TyNat  t
     TmPred   t -> requireType TyNat TyNat  t
+    TmIsZero t -> requireType TyNat TyBool t
 
-    TmIf p t f -> predCheck =<< restCheck
+    TmIf p t f -> predCheck =<< retnCheck
       where
-        restCheck   = requireSameType ("then", t) ("else", f)
-        predCheck r = requireType TyBool r p
+      retnCheck   = requireSameType ("then", t) ("else", f)
+      predCheck r = requireType TyBool r p
