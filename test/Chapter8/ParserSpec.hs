@@ -47,3 +47,13 @@ spec = do
 
     it "parse \"(0)\" => 0" $
       parseTerm "(0)" `shouldBe` Right TmZero
+
+    it "parse \"if zero? 0 true false\"" $
+      parseTerm "if zero? 0 true false" `shouldBe`
+        Right (TmIf (TmIsZero TmZero) TmTrue TmFalse)
+
+    it "parse \"if zero? succ 0 succ succ 0 succ 0\"" $
+      parseTerm "if zero? succ 0 succ succ 0 succ 0" `shouldBe`
+        Right (TmIf (TmIsZero $ TmSucc TmZero)
+                    (TmSucc $ TmSucc TmZero)
+                    (TmSucc TmZero))
