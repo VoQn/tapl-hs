@@ -1,20 +1,13 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Chapter8.LexerSpec where
 
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
+
+import Text.ParserSpec
+
 import Text.Parsec
-import Text.Parsec.String (Parser)
-import Text.Parsec.Error
-
 import Chapter8.Lexer
-
-instance Eq ParseError where
-   a == b = errorMessages a == errorMessages b
-
-parseBy :: Parser a -> String -> Either ParseError a
-parseBy p = parse p "<test>"
 
 spec :: Spec
 spec = do

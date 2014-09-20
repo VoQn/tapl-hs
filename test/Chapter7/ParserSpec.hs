@@ -1,21 +1,18 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Chapter7.ParserSpec where
 
 import Test.Hspec
 import Text.Parsec
-import Text.Parsec.Error
+
+import Text.ParserSpec
 
 import Chapter7.Syntax
 import Chapter7.Parser
 
-instance Eq ParseError where
-   a == b = errorMessages a == errorMessages b
-
 parseVar :: Context -> String -> Either ParseError Term
-parseVar ctx = parse (pVar ctx) "<test>"
+parseVar ctx = parseBy (pVar ctx)
 
 parseApp :: Context -> String -> Either ParseError Term
-parseApp ctx = parse (pApp ctx) "<test>"
+parseApp ctx = parseBy (pApp ctx)
 
 spec :: Spec
 spec = do

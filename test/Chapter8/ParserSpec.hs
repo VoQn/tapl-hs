@@ -1,12 +1,11 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Chapter8.ParserSpec where
 
 import Test.Hspec
 
+import Text.ParserSpec()
+
 import Chapter8.Syntax
 import Chapter8.Parser
-
-import Chapter8.LexerSpec()
 
 spec :: Spec
 spec = do
