@@ -45,6 +45,10 @@ spec = do
       parseBy (many $ tLexeme tNumber) "1 2 3 4 5" `shouldBe`
         Right [1, 2, 3, 4, 5]
 
+    it "(tLexeme tNumber) get tokens from \"1 2 3 4 5　\"" $
+      parseBy (many $ tLexeme tNumber) "1 2 3 4 5　" `shouldBe`
+        Right [1, 2, 3, 4, 5]
+
   describe "reserved-token-parser" $ do
 
     it "\"true\"" $

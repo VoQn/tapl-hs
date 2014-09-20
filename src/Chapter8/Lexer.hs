@@ -15,6 +15,9 @@ lexer = Token.makeTokenParser $ emptyDef {
   keywords  = ["true", "false", "succ", "pred", "zero?", "if"]
   operators = [".", "$"]
 
+tSpace :: Parser ()
+tSpace = Token.whiteSpace lexer
+
 tParens :: Parser a -> Parser a
 tParens = Token.parens lexer
 
