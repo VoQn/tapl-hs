@@ -2,18 +2,11 @@
 module Chapter8.ParserSpec where
 
 import Test.Hspec
-import Text.Parsec
-import Text.Parsec.String (Parser)
-import Text.Parsec.Error (errorMessages)
 
 import Chapter8.Syntax
 import Chapter8.Parser
 
-instance Eq ParseError where
-   a == b = errorMessages a == errorMessages b
-
-parseBy :: Parser a -> String -> Either ParseError a
-parseBy p = parse p "<test>"
+import Chapter8.LexerSpec()
 
 spec :: Spec
 spec = do
