@@ -42,7 +42,8 @@ library
                     Chapter8.NumVal,
                     Chapter8.Syntax,
                     Chapter8.Lexer,
-                    Chapter8.Parser
+                    Chapter8.Parser,
+                    Chapter8.Eval
 
 executable tapl-hs
   main-is:          Main.hs
