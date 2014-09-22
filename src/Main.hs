@@ -3,6 +3,7 @@ module Main where
 
 import Chapter4 as Ch4
 import Chapter7 as Ch7
+import Chapter8 as Ch8
 
 import Control.Monad.Trans
 import System.Console.Haskeline hiding (display)
@@ -11,6 +12,7 @@ data REPL
   = Halt
   | Sarith
   | Sulamb
+  | Tyarith
   deriving (Eq, Ord, Show, Enum)
 
 main :: IO ()
@@ -31,21 +33,43 @@ header = (++ "> ") . show
 
 proc :: (MonadIO m) => REPL -> String -> m ()
 proc = \case
-  Sarith -> liftIO . Ch4.process
-  Sulamb -> liftIO . Ch7.process
+  Sarith  -> liftIO . Ch4.process
+  Sulamb  -> liftIO . Ch7.process
+  Tyarith -> liftIO . Ch8.process
+
+headerLine :: String -> Int -> Char -> String
+headerLine l w c =
+  let prefix = l ++ " "; rest = w - length prefix
+  in  prefix ++ lineGen rest [] c
+
+borderLine :: Int -> Char -> String
+borderLine w c = lineGen w [] c
+
+lineGen 0 s c = s
+lineGen n s c = lineGen (n - 1) (c:s) c
+
+lineWith = 40
 
 ask :: InputT IO REPL
 ask = do
-  mapM_ outputStrLn [
-      "TaPL-hs REPL"
-    , "========================================"
-    , "0) Exit"
-    , "1) Sarith (from Chapter 3-4)"
-    , "2) Sulamb (from Chapter 5-7)"
-    , "----------------------------------------"
+  mapM_ outputStrLn $
+    [ borderLine lineWith '='
+    , " TaPL-hs REPL"
+    , borderLine lineWith '-'
+    , " 0) Exit"
+    , " 1) Sarith (from Chapter 3-4)"
+    , " 2) Sulamb (from Chapter 5-7)"
+    , " 3) Tyarith (from Chapter 8)"
+    , borderLine lineWith '='
     ]
   lang <- getInputLine "Select Mode (default: 2) >> "
-  case lang of
-    Nothing -> return Halt
-    Just "" -> return Sulamb
-    Just  i -> return (toEnum (read i))
+  let choose = case lang of
+        Nothing -> Halt
+        Just "" -> Sulamb
+        Just  i -> (toEnum (read i))
+  mapM_ outputStrLn $
+    [ borderLine lineWith '-'
+    , "-- λ" ++ show choose
+    , borderLine lineWith '-'
+    ]
+  return choose
