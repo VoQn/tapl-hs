@@ -19,6 +19,7 @@ TaPL-hs REPL
 0) Exit
 1) Sarith (from Chapter 3-4)
 2) Sulamb (from Chapter 5-7)
+3) Tyarith (from Chapter 8)
 ----------------------------------------
 Select Mode (default: 2) >> # enter language index (quit for 0)
 Sulamb>
@@ -34,8 +35,9 @@ Sulamb>
 > cabal run
 ```
 
-## Sarith (by TaPL-Chapter.3-4)
+## Sarith (by TaPL-Chapter.3-4) / Tyarith (by TaPL-Chapter.8)
 **Sarith** is programming language according to TaPL Chapter.3-4
+**Tyarith** is according to Chapter.8
 
 This language's syntax is like __scheme__
 ### Basic Values (true/false/0)
