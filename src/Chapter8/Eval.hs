@@ -3,8 +3,6 @@
 module Chapter8.Eval (eval) where
 
 import Control.Applicative
-import Chapter8.Type
-import Chapter8.NumVal
 import Chapter8.Syntax
 
 eval :: Term -> Either TypeError Val
