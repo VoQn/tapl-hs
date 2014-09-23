@@ -38,6 +38,7 @@ library
                     Chapter7.Eval,
                     Chapter7.Parser,
                     Chapter8,
+                    Chapter8.Info,
                     Chapter8.Syntax,
                     Chapter8.Syntax.Type,
                     Chapter8.Syntax.Number,
