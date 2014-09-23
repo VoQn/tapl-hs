@@ -6,6 +6,7 @@ import Control.Applicative ((<$>), (<$), (<*>), (*>), (<*))
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
+import Chapter8.Info
 import Chapter8.Syntax
 import Chapter8.Lexer
 
@@ -31,6 +32,15 @@ pTerm
 
 (<||>) :: Parser a -> Parser a -> Parser a
 (<||>) p q = try p <|> q
+
+getInfo :: Parser Info
+getInfo = do
+  pos <- getPosition
+  return $ FileImput {
+      fileName = sourceName pos
+    , line     = sourceLine pos
+    , column   = sourceColumn pos
+    }
 
 pTrue :: Parser Term
 pTrue = TmTrue <$ tReserved "true"
