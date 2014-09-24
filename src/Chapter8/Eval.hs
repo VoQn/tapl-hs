@@ -10,15 +10,15 @@ eval term = typeof term >> eval' term
 
 eval' :: Term -> Either TypeError Val
 eval' = \case
-  TmTrue  -> return $ ValTrue
-  TmFalse -> return $ ValFalse
-  TmZero  -> return $ ValNum NumZero
+  TmTrue  _ -> return $ ValTrue
+  TmFalse _ -> return $ ValFalse
+  TmZero  _ -> return $ ValNum NumZero
 
-  TmSucc   t -> vSucc <$> eval' t
-  TmPred   t -> vPred <$> eval' t
-  TmIsZero t -> vIsZero <$> eval' t
+  TmSucc   _ t -> vSucc <$> eval' t
+  TmPred   _ t -> vPred <$> eval' t
+  TmIsZero _ t -> vIsZero <$> eval' t
 
-  TmIf p t f -> eval' p >>= \case
+  TmIf _ p t f -> eval' p >>= \case
     ValTrue  -> eval' t
     ValFalse -> eval' f
 

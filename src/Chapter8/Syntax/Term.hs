@@ -1,25 +1,27 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Chapter8.Syntax.Term where
 
 import Data.Display
 
+import Chapter8.Info
 import Chapter8.Syntax.Type
 
 data Term
-  = TmTrue                  -- ^ true
-  | TmFalse                 -- ^ false
-  | TmZero                  -- ^ 0
-  | TmSucc   Term           -- ^ succ <term>
-  | TmPred   Term           -- ^ pred <term>
-  | TmIsZero Term           -- ^ zero? <term>
-  | TmIf     Term Term Term -- ^ if <term> then <term> else <term>
+  = TmTrue   Info                -- ^ true
+  | TmFalse  Info                -- ^ false
+  | TmZero   Info                -- ^ 0
+  | TmSucc   Info Term           -- ^ succ <term>
+  | TmPred   Info Term           -- ^ pred <term>
+  | TmIsZero Info Term           -- ^ zero? <term>
+  | TmIf     Info Term Term Term -- ^ if <term> then <term> else <term>
   deriving (Eq, Show)
 
-requireType :: Ty -> Ty -> Term -> Either TypeError Ty
-requireType req ret term = do
+requireType :: Ty -> Term -> Either TypeError Ty
+requireType req term = do
   ty <- typeof term
   if ty == req
-    then Right ret
+    then Right req
     else Left $ MismatchWithRequire req ty
 
 requireSameType :: (String, Term) -> (String, Term) -> Either TypeError Ty
@@ -32,33 +34,32 @@ requireSameType (lt,tt) (lf,tf) = do
 
 instance Display Term where
   toDisplay term = case term of
-    TmTrue  -> "true"
-    TmFalse -> "false"
-    TmZero  -> "0"
+    TmTrue  _ -> "true"
+    TmFalse _ -> "false"
+    TmZero  _ -> "0"
 
-    TmSucc   t -> dispSucc 1 t
-    TmPred   t -> dispApp "pred"  [t]
-    TmIsZero t -> dispApp "zero?" [t]
+    TmSucc   _ t -> dispSucc 1 t
+    TmPred   _ t -> dispApp "pred"  [t]
+    TmIsZero _ t -> dispApp "zero?" [t]
 
-    TmIf p t f -> dispApp "if"    [p,t,f]
+    TmIf _ p t f -> dispApp "if"    [p,t,f]
     where
     dispApp  f = parens . spaceSep . (f :) . map toDisplay
     dispSucc n tm = case tm of
-      TmZero   -> toDisplay $ n `max` (0 :: Integer)
-      TmSucc t -> dispSucc (n + 1) t
-      others   -> dispApp "succ" [others]
+      TmZero _   -> toDisplay $ n `max` (0 :: Integer)
+      TmSucc _ t -> dispSucc (n + 1) t
+      others     -> dispApp "succ" [others]
 
 instance HasType Term where
   typeof term = case term of
-    TmTrue  -> Right TyBool
-    TmFalse -> Right TyBool
-    TmZero  -> Right TyNat
+    TmTrue  _ -> return TyBool
+    TmFalse _ -> return TyBool
+    TmZero  _ -> return TyNat
 
-    TmSucc   t -> requireType TyNat TyNat  t
-    TmPred   t -> requireType TyNat TyNat  t
-    TmIsZero t -> requireType TyNat TyBool t
+    TmSucc   _ t -> requireType TyNat t >> return TyNat
+    TmPred   _ t -> requireType TyNat t >> return TyNat
+    TmIsZero _ t -> requireType TyNat t >> return TyBool
 
-    TmIf p t f -> predCheck =<< retnCheck
-      where
-      retnCheck   = requireSameType ("then", t) ("else", f)
-      predCheck r = requireType TyBool r p
+    TmIf _ p t f -> do
+      requireType TyBool p
+      requireSameType ("then", t) ("else", f)

@@ -43,25 +43,25 @@ getInfo = do
     }
 
 pTrue :: Parser Term
-pTrue = TmTrue <$ tReserved "true"
+pTrue = TmTrue <$> getInfo <* tReserved "true"
 
 pFalse :: Parser Term
-pFalse = TmFalse <$ tReserved "false"
+pFalse = TmFalse <$> getInfo <* tReserved "false"
 
 pNat :: Parser Term
-pNat = grow <$> tNumber
+pNat = grow <$> getInfo <*> tNumber
   where
-  grow 0 = TmZero
-  grow n = TmSucc $ grow (n - 1)
+  grow i 0 = TmZero i
+  grow i n = TmSucc i $ grow i $ n - 1
 
 pSucc :: Parser Term
-pSucc = tReserved "succ" >> (TmSucc <$> pExpr)
+pSucc = tReserved "succ" >> (TmSucc <$> getInfo <*> pExpr)
 
 pPred :: Parser Term
-pPred = tReserved "pred" >> (TmPred <$> pExpr)
+pPred = tReserved "pred" >> (TmPred <$> getInfo <*> pExpr)
 
 pIsZero :: Parser Term
-pIsZero = tReserved "zero?" >> (TmIsZero <$>  pExpr)
+pIsZero = tReserved "zero?" >> (TmIsZero <$> getInfo <*> pExpr)
 
 pIf :: Parser Term
-pIf = tReserved "if" >> (TmIf <$> pExpr <*> pExpr <*> pExpr)
+pIf = tReserved "if" >> (TmIf <$> getInfo <*> pExpr <*> pExpr <*> pExpr)
