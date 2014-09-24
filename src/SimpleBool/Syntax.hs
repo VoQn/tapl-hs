@@ -5,10 +5,7 @@ import Control.Monad.Error hiding (Error)
 import Control.Monad.Reader
 import Control.Monad.State
 
-data Info
-  = FileImput { name :: String, line :: Int, column :: Int }
-  | Unknown
-  deriving (Eq, Show)
+import Data.Info
 
 data Type
   = TyArr  Type Type -- ^ T -> T
