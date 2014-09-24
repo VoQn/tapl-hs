@@ -7,18 +7,33 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 
-import Chapter8
+import Data.Display
+import Chapter8.Info
+import Chapter8.Syntax
+
+mock x = x Unknown
+
+(?+) x y = mock x $ y
+
+(?*) x y = mock x $ mock y
+
+infixr 6 ?+
+infixr 8 ?*
+
+instance Arbitrary Info where
+  arbitrary = pure Unknown
 
 instance Arbitrary Term where
   arbitrary = oneof [gBool, gNum, gIf]
     where
-    gBoolVal = elements [TmTrue, TmFalse]
-    gNumVal  = pure TmZero
-    gNumApp  = foldr ($) TmZero <$> listOf1 (elements [TmSucc, TmPred])
-    gIsZero  = TmIsZero <$> gNumApp
+    gBoolVal = ($) <$> elements [TmTrue, TmFalse] <*> arbitrary
+    gNumVal  = pure $ mock TmZero
+    gNumFun  = elements $ map mock [TmSucc, TmPred]
+    gNumApp  = foldr ($) <$> gNumVal <*> listOf1 gNumFun
+    gIsZero  = (TmIsZero ?+) <$> gNumApp
     gIf      = oneof [gIfBool, gIfNum]
-    gIfBool  = TmIf <$> gBool <*> gBool <*> gBool
-    gIfNum   = TmIf <$> gBool <*> gNum  <*> gNum
+    gIfBool  = (TmIf ?+) <$> gBool <*> gBool <*> gBool
+    gIfNum   = (TmIf ?+) <$> gBool <*> gNum  <*> gNum
     gBool    = oneof [gBoolVal, gIsZero, gIfBool]
     gNum     = oneof [gNumVal,  gNumApp, gIfNum]
 
@@ -31,7 +46,8 @@ beWrong = MkWrongTerm
 instance Arbitrary WrongTerm where
   arbitrary = oneof [gWrongNumApp]
     where
-    gWrongNumApp = beWrong . TmIsZero <$> elements [TmTrue, TmFalse]
+    gBool = elements $ map mock [TmTrue, TmFalse]
+    gWrongNumApp = beWrong . (TmIsZero ?+) <$> gBool
 
 spec :: Spec
 spec = do
@@ -53,73 +69,80 @@ spec = do
     describe "as an instance of HasType type-class" $ do
 
       it "typeof TmTrue => TyBool" $
-        typeof TmTrue `shouldBe` Right TyBool
+        typeof (mock TmTrue) `shouldBe` Right TyBool
 
       it "typeof TmFalse => TyBool" $
-        typeof TmFalse `shouldBe` Right TyBool
+        typeof (mock TmFalse) `shouldBe` Right TyBool
 
       it "typeof TmZero => TyNat" $
-        typeof TmZero `shouldBe` Right TyNat
+        typeof (mock TmZero) `shouldBe` Right TyNat
 
       it "typeof (TmSucc TmZero) => TyNat" $
-        typeof (TmSucc TmZero) `shouldBe` Right TyNat
+        typeof (TmSucc ?* TmZero) `shouldBe` Right TyNat
 
       it "typeof (TmPred $ TmSucc TmZero) => TyNat" $
-        typeof (TmPred $ TmSucc TmZero) `shouldBe` Right TyNat
+        typeof (TmPred ?+ TmSucc ?* TmZero) `shouldBe` Right TyNat
 
       prop "typeof (TmSucc $ [TYPE_ERROR_TERM]) => TypeError" $
         \(t :: WrongTerm) -> do
-          typeof (TmSucc $ unWrong t) `shouldBe`
+          typeof (TmSucc ?+ unWrong t) `shouldBe`
             Left (MismatchWithRequire TyNat TyBool)
 
       it "typeof (TmIsZero TmZero) => TyBool" $
-        typeof (TmIsZero TmZero) `shouldBe` Right TyBool
+        typeof (TmIsZero ?* TmZero) `shouldBe` Right TyBool
 
       it "typeof (TmIsZero TmTrue) => TypeError" $
-        typeof (TmIsZero TmTrue) `shouldBe`
+        typeof (TmIsZero ?* TmTrue) `shouldBe`
           Left (MismatchWithRequire TyNat TyBool)
 
-      it "typeof (TmIf (TmIsZero TmZero) TmTrue TmFalse)" $
-        typeof (TmIf (TmIsZero TmZero) TmTrue TmFalse) `shouldBe`
-          Right TyBool
+      it "typeof (TmIf (TmIsZero TmZero) TmTrue TmFalse)" $ do
+        let term = (mock TmIf) (TmIsZero ?* TmZero) (mock TmTrue) (mock TmFalse)
+        typeof term `shouldBe` Right TyBool
 
-      it "typeof (TmIf (TmIsZero TmZero) TmTrue TmFalse)" $
-        typeof (TmIf TmTrue (TmSucc TmZero) TmFalse) `shouldBe`
+      it "typeof (TmIf (TmIsZero TmZero) TmTrue TmFalse)" $ do
+        let term = (mock TmIf) (mock TmTrue) (TmSucc ?* TmZero) (mock TmFalse)
+        typeof term `shouldBe`
           Left (MultiTypeReturn [("then", TyNat), ("else", TyBool)])
 
       prop "typof (TmIf [TypeSafe] [TYPE_ERROR_TERM] [TypeSafe])" $
         \(e :: WrongTerm) -> do
-          typeof (TmIf TmTrue (unWrong e) TmTrue) `shouldBe`
+          let term = (mock TmIf) (mock TmTrue) (unWrong e) (mock TmTrue)
+          typeof term `shouldBe`
             Left (MismatchWithRequire TyNat TyBool)
 
       prop "typof (TmIf [TypeSafe] [TypeSafe] [TYPE_ERROR_TERM])" $
         \(e :: WrongTerm) -> do
-          typeof (TmIf TmTrue TmTrue (unWrong e)) `shouldBe`
+          let term = (mock TmIf) (mock TmTrue) (mock TmTrue) (unWrong e)
+          typeof term `shouldBe`
             Left (MismatchWithRequire TyNat TyBool)
 
     describe "as an instance of Display type-class" $ do
 
       it "toDisplay TmTrue => \"true\"" $
-        toDisplay TmTrue `shouldBe` "true"
+        toDisplay (mock TmTrue) `shouldBe` "true"
 
       it "toDisplay TmFalse => \"false\"" $
-        toDisplay TmFalse `shouldBe` "false"
+        toDisplay (mock TmFalse) `shouldBe` "false"
 
       it "toDisplay TmZero => \"0\"" $
-        toDisplay TmZero `shouldBe` "0"
+        toDisplay (mock TmZero) `shouldBe` "0"
 
-      it "toDisplay (TmIsZero TmZero) => \"(zero? 0)\"" $
-        toDisplay (TmIsZero TmZero) `shouldBe` "(zero? 0)"
+      it "toDisplay (TmIsZero TmZero) => \"(zero? 0)\"" $ do
+        let term = TmIsZero ?* TmZero
+        toDisplay term `shouldBe` "(zero? 0)"
 
-      it "toDisplay (TmSucc TmZero) => \"1\"" $
-        toDisplay (TmSucc TmZero) `shouldBe` "1"
+      it "toDisplay (TmSucc TmZero) => \"1\"" $ do
+        let term = TmSucc ?* TmZero
+        toDisplay term `shouldBe` "1"
 
-      it "toDisplay (TmSucc $ TmSucc TmZero) => \"2\"" $
-        toDisplay (TmSucc $ TmSucc TmZero) `shouldBe` "2"
+      it "toDisplay (TmSucc $ TmSucc TmZero) => \"2\"" $ do
+        let term = TmSucc ?+ TmSucc ?* TmZero
+        toDisplay term `shouldBe` "2"
 
-      it "toDisplay (TmSucc $ TmPred TmZero) => \"(succ (pred 0))\"" $
-        toDisplay (TmSucc $ TmPred TmZero) `shouldBe` "(succ (pred 0))"
+      it "toDisplay (TmSucc $ TmPred TmZero) => \"(succ (pred 0))\"" $ do
+        let term = TmSucc ?+ TmPred ?* TmZero
+        toDisplay term `shouldBe` "(succ (pred 0))"
 
-      it "toDisplay (TmIf TmTrue TmZero (TmSucc TmZero)) => \"(if true 0 1)\"" $
-        toDisplay (TmIf TmTrue TmZero (TmSucc TmZero)) `shouldBe`
-          "(if true 0 1)"
+      it "toDisplay (TmIf TmTrue TmZero (TmSucc TmZero)) => \"(if true 0 1)\"" $ do
+        let term = (mock TmIf) (mock TmTrue) (mock TmZero) (TmSucc ?* TmZero)
+        toDisplay term `shouldBe` "(if true 0 1)"
