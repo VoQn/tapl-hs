@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Chapter8.Syntax.Term where
 
 import Data.Display
@@ -16,11 +17,11 @@ data Term
   | TmIf     Info Term Term Term -- ^ if <term> then <term> else <term>
   deriving (Eq, Show)
 
-requireType :: Ty -> Ty -> Term -> Either TypeError Ty
-requireType req ret term = do
+requireType :: Ty -> Term -> Either TypeError Ty
+requireType req term = do
   ty <- typeof term
   if ty == req
-    then Right ret
+    then Right req
     else Left $ MismatchWithRequire req ty
 
 requireSameType :: (String, Term) -> (String, Term) -> Either TypeError Ty
@@ -51,15 +52,14 @@ instance Display Term where
 
 instance HasType Term where
   typeof term = case term of
-    TmTrue  _ -> Right TyBool
-    TmFalse _ -> Right TyBool
-    TmZero  _ -> Right TyNat
+    TmTrue  _ -> return TyBool
+    TmFalse _ -> return TyBool
+    TmZero  _ -> return TyNat
 
-    TmSucc   _ t -> requireType TyNat TyNat  t
-    TmPred   _ t -> requireType TyNat TyNat  t
-    TmIsZero _ t -> requireType TyNat TyBool t
+    TmSucc   _ t -> requireType TyNat t >> return TyNat
+    TmPred   _ t -> requireType TyNat t >> return TyNat
+    TmIsZero _ t -> requireType TyNat t >> return TyBool
 
-    TmIf _ p t f -> predCheck =<< retnCheck
-      where
-      retnCheck   = requireSameType ("then", t) ("else", f)
-      predCheck r = requireType TyBool r p
+    TmIf _ p t f -> do
+      requireType TyBool p
+      requireSameType ("then", t) ("else", f)
