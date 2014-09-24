@@ -104,7 +104,7 @@ instance HasType Term where
       TyArr ty1' ty2'
         | ty2 == ty1' -> return ty2
         | otherwise   -> throwError $ show $ MismatchType fi ty1' ty2
-      _ -> throwError $ show $ IsNotFunction fi ty1
+      _ -> throwError $ show $ IsNotArrow fi ty1
 
   typeof (TmIf fi t1 t2 t3) = do
     ty1 <- typeof t1
