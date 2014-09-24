@@ -11,13 +11,13 @@ data Info
   deriving (Eq, Show)
 
 data Type
-  = TyArr  Type Type
-  | TyBool
+  = TyArr  Type Type -- ^ T -> T
+  | TyBool           -- ^ Bool
   deriving (Eq, Show)
 
 data Binding
-  = NameBind
-  | VarBind Type
+  = NameBind      -- ^ λx.x (identifier binding with name)
+  | VarBind  Type -- ^ λx:T (identifier binding with type)
   deriving (Eq, Show)
 
 type Name = String
@@ -40,12 +40,12 @@ data Val
   deriving (Eq, Show)
 
 data Error
-  = WrongBinding  Info Name     -- ^ wrong kind of binding for variable
-  | OutOfContext  Info Int  Int -- ^ wrong index of context
-  | NotFoundNamed Info Name     -- ^ not found name binding variable
-  | MismatchType  Info Type Type
-  | IsNotFunction Info Type
-  | DifferentType Info Type Type
+  = WrongBinding  Info Name      -- ^ wrong kind of binding for variable
+  | OutOfContext  Info Int  Int  -- ^ wrong index of context
+  | NotFoundNamed Info Name      -- ^ not found name binding variable
+  | MismatchType  Info Type Type -- ^ mismatch types
+  | IsNotArrow    Info Type      -- ^ expected arrow type, but recieved others
+  | DifferentType Info Type Type -- ^ include multiple types in expression
   deriving (Eq, Show)
 
 type Eval a = ReaderT Context (ErrorT String (StateT Context IO)) a
