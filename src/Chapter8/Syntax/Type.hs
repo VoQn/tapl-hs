@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Chapter8.Type where
+module Chapter8.Syntax.Type where
 
 import Data.Monoid
 import Data.Display

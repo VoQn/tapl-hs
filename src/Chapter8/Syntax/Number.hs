@@ -1,9 +1,9 @@
-module Chapter8.NumVal where
+module Chapter8.Syntax.Number where
 
 import Data.Monoid
 import Data.Display
 
-import Chapter8.Type
+import Chapter8.Syntax.Type
 
 data NumVal
   = NumZero

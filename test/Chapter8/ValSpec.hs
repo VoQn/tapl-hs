@@ -7,7 +7,7 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
 
-import Chapter8.NumValSpec()
+import Chapter8.NumberSpec()
 import Chapter8
 
 instance Arbitrary Val where

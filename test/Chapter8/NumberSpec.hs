@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Chapter8.NumValSpec where
+module Chapter8.NumberSpec where
 
 import Data.Monoid
 import Control.Applicative
