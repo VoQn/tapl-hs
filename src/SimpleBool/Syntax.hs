@@ -20,8 +20,8 @@ data Term
   | TmIf    Info Term Term Term -- ^ if <term> <term> <term>
   deriving (Eq, Show)
 
-getBindingByIndex :: Info -> Int -> Eval (Name, Binding)
-getBindingByIndex info i = do
+getBind :: Info -> Int -> Eval (Name, Binding)
+getBind info i = do
   ctx <- ask
   let l = length ctx
   if l > i
@@ -29,10 +29,10 @@ getBindingByIndex info i = do
     else throwError $ OutOfContext info i l
 
 getBinding :: Info -> Int -> Eval Binding
-getBinding info i = getBindingByIndex info i >>= return . snd
+getBinding info i = getBind info i >>= return . snd
 
 indexToName :: Info -> Int -> Eval Name
-indexToName info i = getBindingByIndex info i >>= return . fst
+indexToName info i = getBind info i >>= return . fst
 
 nameToIndex :: Info -> Name -> Eval Int
 nameToIndex info n = ask >>= search n 0
@@ -83,9 +83,9 @@ instance HasType Term where
 
 instance Drawable Info Term where
   draw = \case
-    TmTrue  info -> return info
-    TmFalse info -> return info
-    TmVar   info _ _ -> return info
-    TmApp   info _ _ -> return info
+    TmTrue  info       -> return info
+    TmFalse info       -> return info
+    TmVar   info _ _   -> return info
+    TmApp   info _ _   -> return info
     TmAbs   info _ _ _ -> return info
     TmIf    info _ _ _ -> return info
