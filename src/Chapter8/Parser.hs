@@ -6,7 +6,7 @@ import Control.Applicative ((<$>), (<$), (<*>), (*>), (<*))
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
-import Chapter8.Info
+import Data.Info
 import Chapter8.Syntax
 import Chapter8.Lexer
 
@@ -37,7 +37,7 @@ getInfo :: Parser Info
 getInfo = do
   pos <- getPosition
   return $ FileImput {
-      fileName = sourceName pos
+      name = sourceName pos
     , line     = sourceLine pos
     , column   = sourceColumn pos
     }
