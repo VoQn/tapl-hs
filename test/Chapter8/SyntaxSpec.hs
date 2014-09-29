@@ -8,7 +8,7 @@ import Test.Hspec.QuickCheck
 import Test.QuickCheck
 
 import Data.Display
-import Chapter8.Info
+import Data.Info
 import Chapter8.Syntax
 
 mock x = x Unknown

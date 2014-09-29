@@ -2,9 +2,9 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Chapter8.Syntax.Term where
 
+import Data.Info
 import Data.Display
 
-import Chapter8.Info
 import Chapter8.Syntax.Type
 
 data Term

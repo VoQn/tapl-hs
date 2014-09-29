@@ -18,7 +18,7 @@ cabal-version:       >=1.10
 library
   default-language: Haskell2010
   hs-source-dirs:   src
-  ghc-options:      -Wall
+  ghc-options:      -Wall -O2
   build-depends:    base >=4.7 && <4.8,
                     mtl >=2.1 && <2.2,
                     text >= 1.1 && <1.2,
@@ -26,6 +26,7 @@ library
                     haskeline >=0.7 && <0.8,
                     parsec >=3.1 && <3.2
   exposed-modules:  Data.Display,
+                    Data.Info,
                     Chapter4,
                     Chapter4.Parser,
                     Chapter4.Syntax,
@@ -38,7 +39,6 @@ library
                     Chapter7.Eval,
                     Chapter7.Parser,
                     Chapter8,
-                    Chapter8.Info,
                     Chapter8.Syntax,
                     Chapter8.Syntax.Type,
                     Chapter8.Syntax.Number,
@@ -51,6 +51,7 @@ library
 executable tapl-hs
   main-is:          Main.hs
   hs-source-dirs:   src
+  ghc-options:      -Wall -O2
   default-language: Haskell2010
   other-extensions: LambdaCase
   build-depends:    base >=4.7 && <4.8,
@@ -64,7 +65,7 @@ test-suite tests
   type:             exitcode-stdio-1.0
   default-language: Haskell2010
   hs-source-dirs:   test
-  ghc-options:      -Wall
+  ghc-options:      -Wall -O2
   main-is:          Spec.hs
   build-depends:    base >=4.7 && <4.8,
                     containers >= 0.5 && <0.6,
