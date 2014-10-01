@@ -1,15 +1,19 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses#-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module SimpleBool.Syntax where
 
+import Data.Monoid
 import Control.Monad.Error hiding (Error)
 import Control.Monad.Reader
 
-import Data.Info (Info)
-import Data.Evaluator (Drawable, draw)
+import Data.Info (Info, Name)
+import Data.Display (toDisplay, parens, spaceSep)
+
 import SimpleBool.Type
-import SimpleBool.Context
+import SimpleBool.Error
+import SimpleBool.Context hiding (Eval)
 
 data Term
   = TmVar   Info Int  Int       -- ^ λ.0(1) (bound variable)
@@ -51,11 +55,31 @@ instance HasType Term where
           else throwError $ DifferentType fi ty2 ty3
       _ -> throwError $ MismatchType fi TyBool ty1
 
-instance Drawable Info Term where
-  draw = \case
+instance HasInfo Term where
+  inform = \case
     TmTrue  info       -> return info
     TmFalse info       -> return info
     TmVar   info _ _   -> return info
     TmApp   info _ _   -> return info
     TmAbs   info _ _ _ -> return info
     TmIf    info _ _ _ -> return info
+
+instance Display Term where
+  buildText (TmTrue _)  = return "true"
+  buildText (TmFalse _) = return "false"
+
+  buildText (TmVar fi i _) = do
+    var <- indexToName fi i
+    return $ toDisplay var
+
+  buildText (TmAbs _ n ty tm) = do
+    tm' <- buildText tm
+    return $ "\\" <> toDisplay n <> ":" <> toDisplay ty <> "." <> tm'
+
+  buildText (TmApp _ t1 t2) = do
+    [t1', t2'] <- mapM buildText [t1, t2]
+    return $ parens $ spaceSep [t1', t2']
+
+  buildText (TmIf _ t1 t2 t3) = do
+    [t1',t2',t3'] <- mapM buildText [t1, t2, t3]
+    return $ parens $ spaceSep ["if", t1', "then", t2', "else", t3']

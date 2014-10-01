@@ -5,8 +5,10 @@ import Data.Monoid
 
 import Data.Display
 
+type Name = String
+
 data Info
-  = FileImput { name :: String, line :: Int, column :: Int }
+  = FileImput { name :: Name, line :: Int, column :: Int }
   | Unknown
   deriving (Eq, Show)
 
