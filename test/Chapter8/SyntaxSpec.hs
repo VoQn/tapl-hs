@@ -11,10 +11,13 @@ import Data.Display
 import Data.Info
 import Chapter8.Syntax
 
+mock :: (Info -> a) -> a
 mock x = x Unknown
 
+(?+) :: (Info -> a -> b) -> a -> b
 (?+) x y = mock x $ y
 
+(?*) :: (Info -> a -> b) -> (Info -> a) -> b
 (?*) x y = mock x $ mock y
 
 infixr 6 ?+

@@ -1,7 +1,7 @@
 
 module Chapter8.Parser where
 
-import Control.Applicative ((<$>), (<$), (<*>), (*>), (<*))
+import Control.Applicative ((<$>), (<*>), (*>), (<*))
 
 import Text.Parsec
 import Text.Parsec.String (Parser)
