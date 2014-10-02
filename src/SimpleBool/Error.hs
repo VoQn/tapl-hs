@@ -3,6 +3,7 @@ module SimpleBool.Error where
 
 import Control.Monad.Error hiding (Error)
 import qualified Control.Monad.Error as M
+import Data.Monoid
 
 import Data.Info
 import Data.Display
@@ -28,4 +29,6 @@ instance M.Error Error where
 instance Display Error where
   toDisplay err = case err of
     NoRuleApplies -> "NoRuleApplies"
+    SomethingWrong msg ->
+      "[ERROR] Something went wrong : " <> toDisplay msg
     _ -> undefined

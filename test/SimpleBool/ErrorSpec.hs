@@ -12,3 +12,6 @@ spec = do
     describe "as an instance of Display type-class" $ do
       it "NoRuleApplies" $
         toDisplay NoRuleApplies `shouldBe` "NoRuleApplies"
+      it "SomethingWrong" $
+        toDisplay (SomethingWrong "maybe implement mistake") `shouldBe`
+          "[ERROR] Something went wrong : maybe implement mistake"
