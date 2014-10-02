@@ -1,9 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
 module SimpleBool.Error where
 
 import Control.Monad.Error hiding (Error)
 import qualified Control.Monad.Error as M
 
 import Data.Info
+import Data.Display
 import SimpleBool.Type
 
 type Message = String
@@ -22,3 +24,8 @@ data Error
 instance M.Error Error where
   noMsg  = SomethingWrong "Something wrong"
   strMsg = SomethingWrong
+
+instance Display Error where
+  toDisplay err = case err of
+    NoRuleApplies -> "NoRuleApplies"
+    _ -> undefined
