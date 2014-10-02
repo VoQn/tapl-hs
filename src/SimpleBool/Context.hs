@@ -52,15 +52,16 @@ class HasInfo a where
 class Display a where
   buildText :: a -> Eval b LB.Builder
 
-pushContext :: MonadReader (Env v) m => Name -> Binding -> m (Env v)
-pushContext x b = do
-  env <- ask
-  return env { context = (x, b) : context env }
+pushBind :: Name -> Binding -> Env b -> Env b
+pushBind x b env =
+  let ctx' = (x, b) : context env
+  in env { context = ctx' }
 
-putContext :: MonadState (Env v) m => Name -> Binding -> m ()
-putContext x b = do
-  env <- get
-  put env { context = (x, b) : context env }
+pushContext :: (MonadReader (Env v) m, Functor m) => Name -> Binding -> m (Env v)
+pushContext x b = pushBind x b <$> ask
+
+putContext :: (MonadState (Env v) m) => Name -> Binding -> m ()
+putContext x b = put . pushBind x b =<< get
 
 getBind :: Info -> Int -> Eval b (Name, Binding)
 getBind info i = do
