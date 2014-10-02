@@ -4,6 +4,7 @@
 module SimpleBool.Context where
 
 import Control.Applicative
+import Control.Monad
 import Control.Monad.Error (throwError)
 import Control.Monad.Reader
 import Control.Monad.State
@@ -66,10 +67,12 @@ pushContext x b = pushBind x b <$> ask
 putContext :: (MonadState (Env v) m) => Name -> Binding -> m ()
 putContext x b = put . pushBind x b =<< get
 
+askContext :: (MonadReader (Env v) m) => m Context
+askContext = liftM context ask
+
 getBind :: Info -> Int -> Eval b (Name, Binding)
 getBind info i = do
-  env <- ask
-  let ctx = context env
+  ctx <- askContext
   let l = length ctx
   if l > i
     then return $ ctx !! i
@@ -82,17 +85,13 @@ indexToName :: Info -> Int -> Eval b Name
 indexToName info i = fst <$> getBind info i
 
 nameToIndex :: Info -> Name -> Eval b Int
-nameToIndex info x = do
-  env <- ask
-  let ctx = context env
-  search 0 ctx
+nameToIndex info x = askContext >>= search 0
   where
-  search c = \case
-    [] -> throwError $ UndefinedSymbol info x
-    ((y,NameBind):ctx)
-      | x == y -> return c
-      | otherwise -> search (c + 1) ctx
-    (_:ctx) -> search (c + 1) ctx
+  search _ [] = throwError $ UndefinedSymbol info x
+  search c ((y, NameBind) : ctx)
+    | x == y    = return c
+    | otherwise = search (c + 1) ctx
+  search c (_:ctx) = search (c + 1) ctx
 
 getTypeFromContext :: Info -> Int -> Eval b Type
 getTypeFromContext info i = getBinding info i >>= \case
