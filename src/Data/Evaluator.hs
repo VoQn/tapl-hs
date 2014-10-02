@@ -4,6 +4,7 @@
 module Data.Evaluator where
 
 import Control.Applicative
+import Control.Monad
 import Control.Monad.Error
 import Control.Monad.Reader
 import Control.Monad.State
@@ -62,9 +63,9 @@ instance MonadError e (Eval s e) where
 newtype EvalT s e m a = EvalT { runEvalT :: s -> m (Either e a, s) }
 
 mapEvalT :: (Monad m) => (a -> b) -> EvalT s e m a -> EvalT s e m b
-mapEvalT f m = EvalT $ \s -> runEvalT m s >>= \case
-  (Left  e, s') -> return (Left e, s')
-  (Right x, s') -> return (Right $ f x, s')
+mapEvalT f m = EvalT $ runEvalT m >=> \case
+  (Left  e, s) -> return (Left e, s)
+  (Right x, s) -> return (Right $ f x, s)
 
 withEvalT :: (Monad m) => (s' -> s) -> EvalT s e m a -> EvalT s' e m a
 withEvalT f m = EvalT $ \s -> runEvalT m (f s) >>= \case
@@ -72,10 +73,10 @@ withEvalT f m = EvalT $ \s -> runEvalT m (f s) >>= \case
   (Right x, _) -> return (Right x, s)
 
 evalEvalT :: (Monad m) => EvalT s e m a -> s -> m (Either e a)
-evalEvalT m s = runEvalT m s >>= return . fst
+evalEvalT m s = liftM fst $ runEvalT m s
 
 execEvalT :: (Monad m) => EvalT s e m a -> s -> m s
-execEvalT m s = runEvalT m s >>= return . snd
+execEvalT m s = liftM snd $ runEvalT m s
 
 instance (Monad m) => Functor (EvalT s e m) where
   fmap = mapEvalT
@@ -83,14 +84,14 @@ instance (Monad m) => Functor (EvalT s e m) where
 instance (Monad m) => Applicative (EvalT s e m) where
   pure  x = EvalT $ \s -> return (Right x, s)
 
-  f <*> m = EvalT $ \s' -> runEvalT f s' >>= \case
+  f <*> m = EvalT $ runEvalT f >=> \case
     (Left  e, s) -> return (Left e, s)
     (Right g, s) -> runEvalT (mapEvalT g m) s
 
 instance (Monad m) => Monad (EvalT s e m) where
   return  = pure
 
-  m >>= k = EvalT $ \s' -> runEvalT m s' >>= \case
+  m >>= k = EvalT $ runEvalT m >=> \case
     (Left  e, s) -> return (Left e, s)
     (Right x, s) -> runEvalT (k x) s
 
@@ -112,6 +113,6 @@ instance (MonadIO m) => MonadIO (EvalT s e m) where
 
 instance (MonadError e m) => MonadError e (EvalT s e m) where
   throwError e   = EvalT $ \s -> return (Left e, s)
-  catchError m h = EvalT $ \s -> evalEvalT m s >>= \case
-    Left e  -> runEvalT (h e) s
-    Right v -> return (Right v, s)
+  catchError m h = EvalT $ runEvalT m >=> \case
+    (Left  e, s) -> runEvalT (h e) s
+    (Right v, s) -> return (Right v, s)

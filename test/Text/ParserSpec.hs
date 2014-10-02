@@ -13,8 +13,7 @@ parseBy :: Parser a -> String -> Either ParseError a
 parseBy p = parse p "<test>"
 
 spec :: Spec
-spec = do
-
-  describe "parseBy" $ do
+spec =
+  describe "parseBy" $
     it "parseBy (many digit) \"0\"" $
       parseBy (many digit) "0" `shouldBe` Right "0"
