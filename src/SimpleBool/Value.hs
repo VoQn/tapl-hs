@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module SimpleBool.Value where
 
+import Control.Applicative
 import Data.Monoid
 
 import Data.Info
@@ -21,7 +22,7 @@ data Val
 instance HasType Val where
   typeof ValTrue  = return TyBool
   typeof ValFalse = return TyBool
-  typeof (ValAbs _ ty tm) = typeof tm >>= return . TyArr ty
+  typeof (ValAbs _ ty tm) = TyArr ty <$> typeof tm
 
 instance Display Val where
   buildText ValTrue  = return "true"

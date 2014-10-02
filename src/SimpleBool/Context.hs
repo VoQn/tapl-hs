@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module SimpleBool.Context where
 
+import Control.Applicative
 import Control.Monad.Error (throwError)
 import Control.Monad.Reader
 import Control.Monad.State
@@ -54,16 +55,12 @@ class Display a where
 pushContext :: MonadReader (Env v) m => Name -> Binding -> m (Env v)
 pushContext x b = do
   env <- ask
-  let tabl = symbols env
-  let ctx' = (x, b) : (context env)
-  return $ Env { symbols = tabl, context = ctx' }
+  return env { context = (x, b) : context env }
 
 putContext :: MonadState (Env v) m => Name -> Binding -> m ()
 putContext x b = do
   env <- get
-  let tabl = symbols env
-  let ctx' = (x, b) : (context env)
-  put $ Env { symbols = tabl, context = ctx' }
+  put env { context = (x, b) : context env }
 
 getBind :: Info -> Int -> Eval b (Name, Binding)
 getBind info i = do
@@ -75,10 +72,10 @@ getBind info i = do
     else throwError $ OutOfContext info i l
 
 getBinding :: Info -> Int -> Eval b Binding
-getBinding info i = getBind info i >>= return . snd
+getBinding info i = snd <$> getBind info i
 
 indexToName :: Info -> Int -> Eval b Name
-indexToName info i = getBind info i >>= return . fst
+indexToName info i = fst <$> getBind info i
 
 nameToIndex :: Info -> Name -> Eval b Int
 nameToIndex info x = do

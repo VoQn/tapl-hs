@@ -9,9 +9,9 @@ import SimpleBool.Syntax
 
 isValue :: Term -> Bool
 isValue tm = case tm of
-  TmAbs   _ _ _ _ -> True
-  TmTrue  _ -> True
-  TmFalse _ -> True
+  TmAbs   {} -> True
+  TmTrue  {} -> True
+  TmFalse {} -> True
   _ -> False
 
 evalTerm1 :: Term -> Eval Term Term
@@ -20,7 +20,7 @@ evalTerm1 (TmApp fi t1 t2) = case t1 of
     | isValue t2 -> return $ substTermTop t2 t1'
     | otherwise  -> throwError NoRuleApplies
   _
-    | isValue t1 -> (TmApp fi t1) <$> evalTerm1 t2
+    | isValue t1 -> TmApp fi t1 <$> evalTerm1 t2
     | otherwise  -> (\tm -> TmApp fi tm t2) <$> evalTerm1 t1
 
 evalTerm1 (TmIf fi t1 t2 t3) = case t1 of
