@@ -25,3 +25,9 @@ spec = do
         toDisplay (WrongBinding info "x") `shouldBe`
           "[ERROR] Wrong kind of binding for variable : x\n" <>
           "file: test (line: 1, column: 1)"
+
+      it "Out of Index by the Context" $ do
+        let info = FileImput "test" 1 10
+        toDisplay (OutOfContext info 1 1) `shouldBe`
+          "[ERROR] Out of Index of the Context : (index: 1, context-depth: 1)\n" <>
+          "file: test (line: 1, column: 10)"

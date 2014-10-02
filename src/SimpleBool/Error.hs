@@ -28,10 +28,19 @@ instance M.Error Error where
 
 instance Display Error where
   toDisplay err = case err of
-    NoRuleApplies -> "[TERMINATE] NoRuleApplies"
+    NoRuleApplies ->
+      "[TERMINATE] NoRuleApplies"
+
     SomethingWrong msg ->
       "[ERROR] Something went wrong : " <> toDisplay msg
+
     WrongBinding fi n ->
-      "[ERROR] Wrong kind of binding for variable : " <> toDisplay n <> "\n" <>
+      "[ERROR] Wrong kind of binding for variable : " <>
+      toDisplay n <> "\n" <> toDisplay fi
+
+    OutOfContext fi i l ->
+      "[ERROR] Out of Index of the Context : " <>
+      "(index: " <> toDisplay i <> ", context-depth: " <> toDisplay l <> ")\n" <>
       toDisplay fi
+
     _ -> undefined
