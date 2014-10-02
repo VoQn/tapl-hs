@@ -21,7 +21,7 @@ spec = do
         let result = runEval $ putContext "x" NameBind
         getEvaledContext result `shouldBe` [("x", NameBind)]
 
-      describe "able to get biding variable (immutable)" $ do
+      describe "able to get binding variable (immutable)" $ do
 
         it "can get last registered binding" $ do
           let result = runEval $ do
