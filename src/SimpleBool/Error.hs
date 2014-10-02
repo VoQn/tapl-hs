@@ -57,4 +57,7 @@ instance Display Error where
       toDisplay ty1 <> " with " <> toDisplay ty2 <> "\n" <>
       toDisplay fi
 
-    _ -> undefined
+    IsNotArrow fi ty ->
+      "[ERROR] Mismatch Type Kind : Required type kind (* -> *), But called " <>
+      toDisplay ty <> "\n" <>
+      toDisplay fi

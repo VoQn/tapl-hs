@@ -61,3 +61,15 @@ spec = do
         toDisplay (CannotTypeUnify info TyBool (TyArr TyBool TyBool)) `shouldBe`
           "[ERROR] Cannot Type Unification : Bool with Bool -> Bool\n" <>
           "file: test (line: 1, column: 10)"
+
+      it "Not-Function Called" $ do
+        {-
+          Example case: (true 10)
+          called value type: Bool, type kind: *
+          function apply form (<f:term> <v:term>)
+          require type kind of `f` is (* -> *)
+        -}
+        let info = FileImput "test" 1 1
+        toDisplay (IsNotArrow info TyBool) `shouldBe`
+          "[ERROR] Mismatch Type Kind : Required type kind (* -> *), But called Bool\n" <>
+          "file: test (line: 1, column: 1)"
