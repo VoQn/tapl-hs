@@ -31,4 +31,7 @@ instance Display Error where
     NoRuleApplies -> "[TERMINATE] NoRuleApplies"
     SomethingWrong msg ->
       "[ERROR] Something went wrong : " <> toDisplay msg
+    WrongBinding fi n ->
+      "[ERROR] Wrong kind of binding for variable : " <> toDisplay n <> "\n" <>
+      toDisplay fi
     _ -> undefined
