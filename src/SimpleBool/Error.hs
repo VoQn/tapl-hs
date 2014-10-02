@@ -18,8 +18,8 @@ data Error
   | MismatchType    Info Type Type -- ^ mismatch types
   | IsNotArrow      Info Type      -- ^ expected arrow type, but recieved others
   | DifferentType   Info Type Type -- ^ include multiple types in expression
-  | SomethingWrong  Message
-  | NoRuleApplies
+  | SomethingWrong  Message        -- ^ something went wrong (for MonadError only)
+  | NoRuleApplies                  -- ^ terminate of evaluate
   deriving (Eq, Show)
 
 instance M.Error Error where
