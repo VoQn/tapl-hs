@@ -44,11 +44,17 @@ instance Display Error where
       toDisplay fi
 
     UndefinedSymbol fi n ->
-      "[ERROR] Undefined symbol : "　<> toDisplay n <> "\n" <>
+      "[ERROR] Undefined Symbol : "　<> toDisplay n <> "\n" <>
       toDisplay fi
 
     MismatchType fi ty1 ty2 ->
       "[ERROR] Mismatch Type : " <>
       toDisplay ty1 <> " with " <> toDisplay ty2 <> "\n" <>
       toDisplay fi
+
+    DifferentType fi ty1 ty2 ->
+      "[ERROR] Cannot Type Unification : " <>
+      toDisplay ty1 <> " with " <> toDisplay ty2 <> "\n" <>
+      toDisplay fi
+
     _ -> undefined

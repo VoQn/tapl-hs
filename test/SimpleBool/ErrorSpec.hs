@@ -36,7 +36,7 @@ spec = do
       it "Not found named symbol" $ do
         let info = FileImput "test" 1 5
         toDisplay (UndefinedSymbol info "foo") `shouldBe`
-          "[ERROR] Undefined symbol : foo\n" <>
+          "[ERROR] Undefined Symbol : foo\n" <>
           "file: test (line: 1, column: 5)"
 
       it "Mismtach Types" $ do
@@ -45,7 +45,19 @@ spec = do
           function require type: Bool
           but applies value has: Number
         -}
-        let info = FileImput "test" 1 11
+        let info = FileImput "test" 1 10
         toDisplay (MismatchType info TyBool (TyArr TyBool TyBool)) `shouldBe`
           "[ERROR] Mismatch Type : Bool with Bool -> Bool\n" <>
-          "file: test (line: 1, column: 11)"
+          "file: test (line: 1, column: 10)"
+
+      it "Multiple Different Type" $ do
+        {-
+          Example case: if x then true else 0
+          then: Bool
+          else: Nat
+          expression include 2 types (cannot type unification)
+        -}
+        let info = FileImput "test" 1 10
+        toDisplay (DifferentType info TyBool (TyArr TyBool TyBool)) `shouldBe`
+          "[ERROR] Cannot Type Unification : Bool with Bool -> Bool\n" <>
+          "file: test (line: 1, column: 10)"
