@@ -28,3 +28,8 @@ spec = do
 
       prop "A /= B ==> B /= A" $ \((a, b) :: (Type, Type)) ->
         a /= b `shouldBe` b /= a
+
+    describe "as an instance of Show type-class" $ do
+
+      prop "show" $ \(x :: Type) ->
+        showList [x] `seq` showsPrec 0 x `seq` show x `seq` True
