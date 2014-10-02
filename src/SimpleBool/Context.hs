@@ -73,7 +73,7 @@ nameToIndex info x = do
   search 0 ctx
   where
   search c = \case
-    [] -> throwError $ NotFoundNamed info x
+    [] -> throwError $ UndefinedSymbol info x
     ((y,NameBind):ctx)
       | x == y -> return c
       | otherwise -> search (c + 1) ctx

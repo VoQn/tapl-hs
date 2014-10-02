@@ -31,3 +31,9 @@ spec = do
         toDisplay (OutOfContext info 1 1) `shouldBe`
           "[ERROR] Out of Index of the Context : (index: 1, context-depth: 1)\n" <>
           "file: test (line: 1, column: 10)"
+
+      it "Not found named symbol" $ do
+        let info = FileImput "test" 1 5
+        toDisplay (UndefinedSymbol info "foo") `shouldBe`
+          "[ERROR] Undefined symbol : foo\n" <>
+          "file: test (line: 1, column: 5)"

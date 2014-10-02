@@ -12,13 +12,13 @@ import SimpleBool.Type
 type Message = String
 
 data Error
-  = WrongBinding   Info Name      -- ^ wrong kind of binding for variable
-  | OutOfContext   Info Int  Int  -- ^ wrong index of context
-  | NotFoundNamed  Info Name      -- ^ not found name binding variable
-  | MismatchType   Info Type Type -- ^ mismatch types
-  | IsNotArrow     Info Type      -- ^ expected arrow type, but recieved others
-  | DifferentType  Info Type Type -- ^ include multiple types in expression
-  | SomethingWrong Message
+  = WrongBinding    Info Name      -- ^ wrong kind of binding for variable
+  | OutOfContext    Info Int  Int  -- ^ wrong index of context
+  | UndefinedSymbol Info Name      -- ^ undefined symbol binding variable
+  | MismatchType    Info Type Type -- ^ mismatch types
+  | IsNotArrow      Info Type      -- ^ expected arrow type, but recieved others
+  | DifferentType   Info Type Type -- ^ include multiple types in expression
+  | SomethingWrong  Message
   | NoRuleApplies
   deriving (Eq, Show)
 
@@ -41,6 +41,10 @@ instance Display Error where
     OutOfContext fi i l ->
       "[ERROR] Out of Index of the Context : " <>
       "(index: " <> toDisplay i <> ", context-depth: " <> toDisplay l <> ")\n" <>
+      toDisplay fi
+
+    UndefinedSymbol fi n ->
+      "[ERROR] Undefined symbol : "　<> toDisplay n <> "\n" <>
       toDisplay fi
 
     _ -> undefined
