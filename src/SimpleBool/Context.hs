@@ -5,6 +5,7 @@ module SimpleBool.Context where
 
 import Control.Monad.Error (throwError)
 import Control.Monad.Reader
+import Control.Monad.State
 
 import qualified Data.Text.Lazy.Builder as LB
 
@@ -35,6 +36,9 @@ type Eval b a = Eval.Eval (Env b) Error a
 runEval :: Eval b a -> (Either Error a, Env b)
 runEval ev = Eval.runEval ev initEnv
 
+getEvaledContext :: (Either Error a, Env b) -> Context
+getEvaledContext = context . snd
+
 class HasType a where
   typeof :: a -> Eval b Type
 
@@ -50,6 +54,13 @@ pushContext x b = do
   let tabl = symbols env
   let ctx' = (x, b) : (context env)
   return $ Env { symbols = tabl, context = ctx' }
+
+putContext :: MonadState (Env v) m => Name -> Binding -> m ()
+putContext x b = do
+  env <- get
+  let tabl = symbols env
+  let ctx' = (x, b) : (context env)
+  put $ Env { symbols = tabl, context = ctx' }
 
 getBind :: Info -> Int -> Eval b (Name, Binding)
 getBind info i = do
