@@ -1,5 +1,8 @@
-{-# LANGUAGE FlexibleInstances, OverloadedStrings #-}
-module Data.Display (Display(..), parens, sep, spaceSep) where
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
+module Data.Display (Display(..), MonadDisplay(..), parens, sep, spaceSep) where
 
 import qualified Data.Text.Lazy.Builder as LB
 import qualified Data.Text.Lazy.IO as LIO
@@ -9,6 +12,9 @@ class Display a where
   toDisplay :: a -> LB.Builder
   display :: a -> IO ()
   display = LIO.putStrLn . LB.toLazyText . toDisplay
+
+class (Monad m) => MonadDisplay a m | m -> a where
+  toDisplayM :: a -> m LB.Builder
 
 instance Display Char where
   toDisplay = LB.singleton

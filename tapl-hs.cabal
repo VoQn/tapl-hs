@@ -46,7 +46,9 @@ library
                     Chapter8.Syntax.Term,
                     Chapter8.Lexer,
                     Chapter8.Parser,
-                    Chapter8.Eval
+                    Chapter8.Eval,
+                    SimpleBool.Type,
+                    SimpleBool.Error
 
 executable tapl-hs
   main-is:          Main.hs

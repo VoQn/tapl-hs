@@ -36,6 +36,7 @@ proc = \case
   Sarith  -> liftIO . Ch4.process
   Sulamb  -> liftIO . Ch7.process
   Tyarith -> liftIO . Ch8.process
+  _ -> undefined
 
 headerLine :: String -> Int -> Char -> String
 headerLine l w c =
@@ -45,22 +46,24 @@ headerLine l w c =
 borderLine :: Int -> Char -> String
 borderLine w c = lineGen w [] c
 
-lineGen 0 s c = s
+lineGen :: Int -> String -> Char -> String
+lineGen 0 s _ = s
 lineGen n s c = lineGen (n - 1) (c:s) c
 
-lineWith = 40
+lineWidth :: Int
+lineWidth = 40
 
 ask :: InputT IO REPL
 ask = do
   mapM_ outputStrLn $
-    [ borderLine lineWith '='
+    [ borderLine lineWidth '='
     , " TaPL-hs REPL"
-    , borderLine lineWith '-'
+    , borderLine lineWidth '-'
     , " 0) Exit"
     , " 1) Sarith (from Chapter 3-4)"
     , " 2) Sulamb (from Chapter 5-7)"
     , " 3) Tyarith (from Chapter 8)"
-    , borderLine lineWith '='
+    , borderLine lineWidth '='
     ]
   lang <- getInputLine "Select Mode (default: 2) >> "
   let choose = case lang of
@@ -68,8 +71,8 @@ ask = do
         Just "" -> Sulamb
         Just  i -> (toEnum (read i))
   mapM_ outputStrLn $
-    [ borderLine lineWith '-'
+    [ borderLine lineWidth '-'
     , "-- λ" ++ show choose
-    , borderLine lineWith '-'
+    , borderLine lineWidth '-'
     ]
   return choose
