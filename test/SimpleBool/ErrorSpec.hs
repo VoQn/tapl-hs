@@ -11,7 +11,7 @@ spec = do
   describe "SimpleBool Error data-types" $ do
     describe "as an instance of Display type-class" $ do
       it "NoRuleApplies" $
-        toDisplay NoRuleApplies `shouldBe` "NoRuleApplies"
+        toDisplay NoRuleApplies `shouldBe` "[TERMINATE] NoRuleApplies"
       it "SomethingWrong" $
         toDisplay (SomethingWrong "maybe implement mistake") `shouldBe`
           "[ERROR] Something went wrong : maybe implement mistake"

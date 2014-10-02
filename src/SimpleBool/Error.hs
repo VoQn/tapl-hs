@@ -28,7 +28,7 @@ instance M.Error Error where
 
 instance Display Error where
   toDisplay err = case err of
-    NoRuleApplies -> "NoRuleApplies"
+    NoRuleApplies -> "[TERMINATE] NoRuleApplies"
     SomethingWrong msg ->
       "[ERROR] Something went wrong : " <> toDisplay msg
     _ -> undefined
