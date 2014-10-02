@@ -39,3 +39,18 @@ spec = do
         it "throw Error when wrong index of context" $ do
           let result = runEval $ getBind Unknown 0
           getEvaledResult result `shouldBe` Left (OutOfContext Unknown 0 0)
+
+      describe "can get binding variable (mutable)" $ do
+
+        it "can get last registered binding" $ do
+          let result = runEval $ do
+                putContext "x" NameBind
+                getBind Unknown 0
+          getEvaledResult result `shouldBe` Right ("x", NameBind)
+
+        it "can get first registered binding" $ do
+          let result = runEval $ do
+                putContext "y" NameBind
+                putContext "x" NameBind
+                getBind Unknown 1
+          getEvaledResult result `shouldBe` Right ("y", NameBind)
