@@ -32,6 +32,9 @@ initEnv = Env { symbols = Map.empty, context = [] }
 
 type Eval b a = Eval.Eval (Env b) Error a
 
+runEval :: Eval b a -> (Either Error a, Env b)
+runEval ev = Eval.runEval ev initEnv
+
 class HasType a where
   typeof :: a -> Eval b Type
 

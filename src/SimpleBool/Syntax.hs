@@ -24,6 +24,40 @@ data Term
   | TmIf    Info Term Term Term -- ^ if <term> <term> <term>
   deriving (Eq, Show)
 
+-------------------------------------------------------------------------------
+-- Shift (Modify Variable's Index & Context Depth)
+-------------------------------------------------------------------------------
+mapTerm :: (Int -> Info -> Int -> Int -> Term) -> Int -> Term -> Term
+mapTerm onvar c0 = walk c0
+  where
+    walk :: Int -> Term -> Term
+    walk c = \case
+      TmVar fi i  l     -> onvar c fi i l
+      TmAbs fi x  ty t2 -> TmAbs fi x ty $ walk (c + 1) t2
+      TmApp fi t1 t2    -> TmApp fi (walk c t1) (walk c t2)
+      TmIf  fi t1 t2 t3 -> TmIf  fi (walk c t1) (walk c t2) (walk c t3)
+      tm -> tm
+
+shiftTermAbove :: Int -> Int -> Term -> Term
+shiftTermAbove d c0 = mapTerm shiftVar c0
+  where
+  shiftVar c fi i l
+    | i >= c    = TmVar fi (i + d) (l + d)
+    | otherwise = TmVar fi i (l + d)
+
+shiftTerm :: Int -> Term -> Term
+shiftTerm d = shiftTermAbove d 0
+
+substTerm :: Int -> Term -> Term -> Term
+substTerm d s t = mapTerm modify d t
+  where
+  modify c fi i l
+    | i == c    = shiftTerm c s
+    | otherwise = TmVar fi i l
+
+substTermTop :: Term -> Term -> Term
+substTermTop s = shiftTerm (-1) . substTerm 0 (shiftTerm 1 s)
+
 instance HasType Term where
   typeof (TmTrue  _) = return TyBool
   typeof (TmFalse _) = return TyBool

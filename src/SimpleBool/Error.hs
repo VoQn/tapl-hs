@@ -16,6 +16,7 @@ data Error
   | IsNotArrow     Info Type      -- ^ expected arrow type, but recieved others
   | DifferentType  Info Type Type -- ^ include multiple types in expression
   | SomethingWrong Message
+  | NoRuleApplies
   deriving (Eq, Show)
 
 instance M.Error Error where
