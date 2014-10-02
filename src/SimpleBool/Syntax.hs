@@ -5,12 +5,12 @@
 module SimpleBool.Syntax where
 
 import Data.Monoid
+import Control.Applicative
 import Control.Monad.Error hiding (Error)
-import Control.Monad.Reader
 
 import Data.Info (Info, Name)
 import Data.Display (toDisplay, parens, spaceSep)
-
+import Data.Evaluator ((|->))
 import SimpleBool.Type
 import SimpleBool.Error
 import SimpleBool.Context hiding (Eval)
@@ -36,7 +36,7 @@ mapTerm onvar = walk
       TmAbs fi x  ty t2 -> TmAbs fi x ty $ walk (c + 1) t2
       TmApp fi t1 t2    -> TmApp fi (walk c t1) (walk c t2)
       TmIf  fi t1 t2 t3 -> TmIf  fi (walk c t1) (walk c t2) (walk c t3)
-      tm -> tm
+      term              -> term
 
 shiftTermAbove :: Int -> Int -> Term -> Term
 shiftTermAbove d = mapTerm shiftVar
@@ -64,14 +64,12 @@ instance HasType Term where
 
   typeof (TmVar fi i _) = getTypeFromContext fi i
 
-  typeof (TmAbs _ n ty tm) = do
-    env' <- pushContext n $ VarBind ty
-    ty'  <- local (const env') (typeof tm)
-    return $ TyArr ty ty'
+  typeof (TmAbs _ n ty tm) =
+    let ty2 = pushContext n (VarBind ty) |-> typeof tm in
+    TyArr ty <$> ty2
 
   typeof (TmApp fi t1 t2) = do
-    ty1 <- typeof t1
-    ty2 <- typeof t2
+    [ty1, ty2] <- mapM typeof [t1, t2]
     case ty1 of
       TyArr ty1' ty2'
         | ty2 == ty1' -> return ty2'
@@ -79,14 +77,11 @@ instance HasType Term where
       _ -> throwError $ IsNotArrow fi ty1
 
   typeof (TmIf fi t1 t2 t3) = do
-    ty1 <- typeof t1
+    [ty1, ty2, ty3] <- mapM typeof [t1, t2, t3]
     case ty1 of
-      TyBool -> do
-        ty2 <- typeof t2
-        ty3 <- typeof t3
-        if ty2 == ty3
-          then return ty2
-          else throwError $ CannotTypeUnify fi ty2 ty3
+      TyBool
+        | ty2 == ty3 -> return ty2
+        | otherwise  -> throwError $ CannotTypeUnify fi ty2 ty3
       _ -> throwError $ MismatchType fi TyBool ty1
 
 instance HasInfo Term where
@@ -102,17 +97,19 @@ instance Display Term where
   buildText (TmTrue _)  = return "true"
   buildText (TmFalse _) = return "false"
 
-  buildText (TmVar fi i _) = do
-    var <- indexToName fi i
-    return $ toDisplay var
+  buildText (TmVar fi i _) =
+    toDisplay <$> indexToName fi i
 
-  buildText (TmAbs _ n ty tm) = do
-    tm' <- buildText tm
-    return $ "\\" <> toDisplay n <> ":" <> toDisplay ty <> "." <> tm'
+  buildText (TmAbs _ n ty tm) =
+    let
+      var  = toDisplay n
+      typ  = toDisplay ty
+      body = buildText tm
+    in
+    mappend ("\\" <> var <> ":" <> typ <> ".") <$> body
 
-  buildText (TmApp _ t1 t2) = do
-    [t1', t2'] <- mapM buildText [t1, t2]
-    return $ parens $ spaceSep [t1', t2']
+  buildText (TmApp _ t1 t2) =
+    parens . spaceSep <$> mapM buildText [t1, t2]
 
   buildText (TmIf _ t1 t2 t3) = do
     [t1',t2',t3'] <- mapM buildText [t1, t2, t3]

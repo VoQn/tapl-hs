@@ -34,8 +34,11 @@ initEnv = Env { symbols = Map.empty, context = [] }
 
 type Eval b a = Eval.Eval (Env b) Error a
 
-runEval :: Eval b a -> (Either Error a, Env b)
-runEval ev = Eval.runEval ev initEnv
+runEval :: Env b -> Eval b a -> (Either Error a, Env b)
+runEval env ev = Eval.runEval ev env
+
+runEvalTop :: Eval b a -> (Either Error a, Env b)
+runEvalTop ev = Eval.runEval ev initEnv
 
 getEvaledResult :: (Either Error a, Env b) -> Either Error a
 getEvaledResult = fst

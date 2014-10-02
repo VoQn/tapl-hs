@@ -9,6 +9,16 @@ import Control.Monad.Error
 import Control.Monad.Reader
 import Control.Monad.State
 
+closure :: (MonadReader r m) => r -> m a -> m a
+closure r = local (const r)
+
+scope :: (MonadReader r m) => m a -> r -> m a
+scope m r = local (const r) m
+
+(|->) :: MonadReader r m => m r -> m b -> m b
+m |-> k = m >>= \r -> local (const r) k
+infixl 2 |->
+
 newtype Eval s e a = Eval { runEval :: s -> (Either e a, s) }
 
 mapEval :: (a -> b) -> Eval s e a -> Eval s e b
