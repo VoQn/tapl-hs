@@ -9,8 +9,8 @@ import SimpleBool.Error
 import SimpleBool.Context
 
 spec :: Spec
-spec = do
-  describe "SimpleBool Contexts" $ do
+spec =
+  describe "SimpleBool Contexts" $
     describe "Control Context" $ do
 
       it "able to put new name-bind variable (immutable)" $ do
