@@ -86,7 +86,7 @@ instance HasType Term where
         ty3 <- typeof t3
         if ty2 == ty3
           then return ty2
-          else throwError $ DifferentType fi ty2 ty3
+          else throwError $ CannotTypeUnify fi ty2 ty3
       _ -> throwError $ MismatchType fi TyBool ty1
 
 instance HasInfo Term where

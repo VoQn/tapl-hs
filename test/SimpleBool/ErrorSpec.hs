@@ -50,14 +50,14 @@ spec = do
           "[ERROR] Mismatch Type : Bool with Bool -> Bool\n" <>
           "file: test (line: 1, column: 10)"
 
-      it "Multiple Different Type" $ do
+      it "Cannot Type Unification" $ do
         {-
           Example case: if x then true else 0
-          then: Bool
-          else: Nat
+          then type: Bool
+          else type: Nat
           expression include 2 types (cannot type unification)
         -}
         let info = FileImput "test" 1 10
-        toDisplay (DifferentType info TyBool (TyArr TyBool TyBool)) `shouldBe`
+        toDisplay (CannotTypeUnify info TyBool (TyArr TyBool TyBool)) `shouldBe`
           "[ERROR] Cannot Type Unification : Bool with Bool -> Bool\n" <>
           "file: test (line: 1, column: 10)"

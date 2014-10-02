@@ -17,7 +17,7 @@ data Error
   | UndefinedSymbol Info Name      -- ^ undefined symbol binding variable
   | MismatchType    Info Type Type -- ^ mismatch types
   | IsNotArrow      Info Type      -- ^ expected arrow type, but recieved others
-  | DifferentType   Info Type Type -- ^ include multiple types in expression
+  | CannotTypeUnify Info Type Type -- ^ include multiple types in expression
   | SomethingWrong  Message        -- ^ something went wrong (for MonadError only)
   | NoRuleApplies                  -- ^ terminate of evaluate
   deriving (Eq, Show)
@@ -52,7 +52,7 @@ instance Display Error where
       toDisplay ty1 <> " with " <> toDisplay ty2 <> "\n" <>
       toDisplay fi
 
-    DifferentType fi ty1 ty2 ->
+    CannotTypeUnify fi ty1 ty2 ->
       "[ERROR] Cannot Type Unification : " <>
       toDisplay ty1 <> " with " <> toDisplay ty2 <> "\n" <>
       toDisplay fi
