@@ -6,6 +6,7 @@ import Test.Hspec
 
 import Data.Info
 import Data.Display
+import SimpleBool.Type
 import SimpleBool.Error
 
 spec :: Spec
@@ -37,3 +38,14 @@ spec = do
         toDisplay (UndefinedSymbol info "foo") `shouldBe`
           "[ERROR] Undefined symbol : foo\n" <>
           "file: test (line: 1, column: 5)"
+
+      it "Mismtach Types" $ do
+        {-
+          Example case: (x : Bool -> not x) 10
+          function require type: Bool
+          but applies value has: Number
+        -}
+        let info = FileImput "test" 1 11
+        toDisplay (MismatchType info TyBool (TyArr TyBool TyBool)) `shouldBe`
+          "[ERROR] Mismatch Type : Bool with Bool -> Bool\n" <>
+          "file: test (line: 1, column: 11)"

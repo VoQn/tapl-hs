@@ -47,4 +47,8 @@ instance Display Error where
       "[ERROR] Undefined symbol : "　<> toDisplay n <> "\n" <>
       toDisplay fi
 
+    MismatchType fi ty1 ty2 ->
+      "[ERROR] Mismatch Type : " <>
+      toDisplay ty1 <> " with " <> toDisplay ty2 <> "\n" <>
+      toDisplay fi
     _ -> undefined

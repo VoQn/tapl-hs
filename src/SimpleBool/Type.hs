@@ -12,4 +12,4 @@ data Type
 instance Display Type where
   toDisplay TyBool = "Bool"
   toDisplay (TyArr ty1 ty2) =
-    sep "->" $ map toDisplay [ty1, ty2]
+    sep " -> " $ map toDisplay [ty1, ty2]
