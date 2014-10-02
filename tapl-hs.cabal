@@ -74,6 +74,7 @@ test-suite tests
   other-extensions: OverloadedStrings,
                     ScopedTypeVariables
   build-depends:    base >=4.7 && <4.8,
+                    mtl >=2.1 && <2.2,
                     containers >= 0.5 && <0.6,
                     text >=1.1 && <1.2,
                     HUnit >=1.2 && <1.3,

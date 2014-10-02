@@ -36,6 +36,9 @@ type Eval b a = Eval.Eval (Env b) Error a
 runEval :: Eval b a -> (Either Error a, Env b)
 runEval ev = Eval.runEval ev initEnv
 
+getEvaledResult :: (Either Error a, Env b) -> Either Error a
+getEvaledResult = fst
+
 getEvaledContext :: (Either Error a, Env b) -> Context
 getEvaledContext = context . snd
 
